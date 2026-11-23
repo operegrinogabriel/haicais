@@ -211,6 +211,16 @@ mark{background:color-mix(in srgb,var(--accent) 22%,transparent);color:inherit;b
 .checks input{width:auto;padding:0;margin:0}
 #bookform{scroll-margin-top:140px}
 .btn.book{font-size:12.5px}
+/* cartão para compartilhar */
+#sharecard{background:var(--sheet);border:1px solid var(--rule);border-radius:14px;padding:18px;margin-block:14px;display:grid;gap:14px}
+#sharecard h2{margin:0;font-family:var(--f-poem);font-size:20px;font-weight:600}
+#sharecard h2 span{color:var(--accent);margin-left:6px}
+#sharecard .chip{--c:var(--accent)}
+#sc-prev{display:flex;justify-content:center;background:var(--paper);border-radius:10px;padding:12px}
+#sc-canvas{display:block;max-width:100%;max-height:58vh;width:auto;height:auto;border-radius:4px;box-shadow:0 4px 18px rgba(0,0,0,.14)}
+#sharecard input[type=text]{font-size:16px}
+.btn.ic-share{padding:7px 9px}
+.btn.ic-share svg{display:block}
 /* livreto: visualização */
 #bookview{position:fixed;inset:0;z-index:50;overflow:auto;background:#e6e5df;-webkit-overflow-scrolling:touch}
 .bk-bar{position:sticky;top:0;z-index:2;display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:10px 16px;padding-top:calc(10px + env(safe-area-inset-top,0px));background:var(--paper);border-bottom:1px solid var(--rule)}
@@ -371,6 +381,31 @@ footer{padding-block:40px 60px;color:var(--ink-3);font-size:12px;text-align:cent
       <div class="row">
         <button class="btn" id="bk-close" type="button">Cancelar</button>
         <button class="btn primary" id="bk-make" type="button">Ver livreto</button>
+      </div>
+    </div>
+  </section>
+  <section id="sharecard" hidden aria-label="Cartão para compartilhar">
+    <h2>Cartão para compartilhar<span lang="ja">短冊</span></h2>
+    <div id="sc-prev"><canvas id="sc-canvas" width="1080" height="1080" aria-label="Prévia do cartão"></canvas></div>
+    <div class="bk-grid">
+      <div class="field wide">Formato<div class="chips" id="sc-format"><button type="button" class="chip" data-v="sq">Quadrado · feed</button><button type="button" class="chip" data-v="pt">Retrato · feed</button><button type="button" class="chip" data-v="st">Stories</button></div></div>
+      <div class="field wide">Fundo<div class="chips" id="sc-bg"><button type="button" class="chip" data-v="papel">Papel</button><button type="button" class="chip" data-v="noite">Noite</button><button type="button" class="chip" data-v="estacao">Cor da estação</button></div></div>
+      <div class="field wide">Mostrar
+        <div class="checks" id="sc-show">
+          <label><input type="checkbox" data-k="date"> data</label>
+          <label><input type="checkbox" data-k="season"> estação</label>
+          <label><input type="checkbox" data-k="kigo"> kigo</label>
+          <label><input type="checkbox" data-k="num"> número</label>
+        </div>
+      </div>
+      <label class="field wide">Assinatura<input type="text" id="sc-sig" placeholder="seu nome ou @perfil" autocomplete="off" maxlength="40"></label>
+    </div>
+    <div class="composer-foot">
+      <span></span>
+      <div class="row">
+        <button class="btn" id="sc-close" type="button">Voltar</button>
+        <button class="btn" id="sc-save" type="button">Salvar imagem</button>
+        <button class="btn primary" id="sc-share" type="button">Compartilhar</button>
       </div>
     </div>
   </section>
@@ -539,7 +574,7 @@ function findKigos(text){
 function card(h,terms,opts={}){
   const acts=canWrite&&!opts.noActs?(confirmId===h.id
     ?`<span class="acts" style="opacity:1"><span class="confirm">Apagar este haicai?<button class="btn ghost danger" data-act="del-yes" data-id="${h.id}">Apagar</button><button class="btn ghost" data-act="del-no">Manter</button></span></span>`
-    :`<span class="acts"><button class="btn ghost" data-act="edit" data-id="${h.id}">Editar</button><button class="btn ghost" data-act="del" data-id="${h.id}">Apagar</button></span>`):"";
+    :`<span class="acts"><button class="btn ghost ic-share" data-act="share" data-id="${h.id}" aria-label="Fazer cartão para compartilhar" title="Cartão para compartilhar"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="M8 7l4-4 4 4"/><path d="M6 11H5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-8a1 1 0 0 0-1-1h-1"/></svg></button><button class="btn ghost" data-act="edit" data-id="${h.id}">Editar</button><button class="btn ghost" data-act="del" data-id="${h.id}">Apagar</button></span>`):"";
   return `<article class="hk" data-id="${h.id}">
     <div class="meta"><span class="num">${h.n!=null?esc(h.n):"—"}</span>${h.season?`<span class="dot c-${h.season}" title="${SLABEL[h.season]}"></span>`:""}<time>${fmtDate(h.date)}</time>${h.kigo?`<span class="kg" title="Kigo deste haicai">kigo: ${hl(h.kigo,terms)}</span>`:""}${acts}${opts.noActs?(h.fav?'<span class="star on" aria-label="favorito">★</span>':""):`<button type="button" class="star${h.fav?" on":""}" data-act="fav" data-id="${h.id}" aria-pressed="${!!h.fav}" aria-label="${h.fav?"Tirar dos favoritos":"Marcar como favorito"}">${h.fav?"★":"☆"}</button>`}</div>
     ${h.note?`<p class="note">${hl(h.note,terms)}</p>`:""}
@@ -739,6 +774,7 @@ function randomPick(){if(view!=="haicais")setView("haicais");const items=all().f
 document.addEventListener("click",e=>{
   const b=e.target.closest("[data-act]");if(!b)return;const a=b.dataset.act,id=b.dataset.id;
   if(a==="edit"){openComposer(all().find(x=>x.id===id))}
+  else if(a==="share"){openShare(id)}
   else if(a==="fav"){toggleFav(id)}
   else if(a==="del"){confirmId=id;render()}
   else if(a==="del-no"){confirmId=null;render()}
@@ -973,11 +1009,97 @@ $("#bk-dl").addEventListener("click",()=>{
 });
 document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!$("#bookview").hidden)closeBook()});
 
+/* ---------- cartão para compartilhar ---------- */
+const SC_FMT={sq:[1080,1080],pt:[1080,1350],st:[1080,1920]};
+const SC_SEA={primavera:"#9c4268",verao:"#a3631a",outono:"#8f3f25",inverno:"#3f5d77"};
+const SC_KANJI={primavera:"春",verao:"夏",outono:"秋",inverno:"冬"};
+let sc=Object.assign({fmt:"sq",bg:"papel",show:{date:true,season:true,kigo:true,num:false}},store.get("hk.card",{}));
+let scId=null, scBlob=null, scSeq=0;
+function scHaiku(){return all().find(x=>x.id===scId)}
+function scKigo(h){if(h.kigo)return h.kigo;if(!kigos.length||!h.text)return "";const f=findKigos(h.text);return f.length===1?f[0].t.toLocaleLowerCase("pt-BR"):""}
+function openShare(id){
+  scId=id; if(!scHaiku())return;
+  $("#sc-sig").value=store.get("hk.sig","");
+  scSync(); setView("cartao"); scDraw();
+}
+function scSync(){
+  $("#sc-format").querySelectorAll(".chip").forEach(b=>b.setAttribute("aria-pressed",b.dataset.v===sc.fmt));
+  $("#sc-bg").querySelectorAll(".chip").forEach(b=>b.setAttribute("aria-pressed",b.dataset.v===sc.bg));
+  $("#sc-show").querySelectorAll("input").forEach(i=>i.checked=!!sc.show[i.dataset.k]);
+}
+function scWrap(ctx,line,max){
+  if(ctx.measureText(line).width<=max)return [line];
+  const words=[];line.split(/\s+/).forEach(w=>{if(words.length&&/^[—–\-…,.;:!?]+$/.test(w))words[words.length-1]+=" "+w;else words.push(w)});
+  const out=[];let cur="";
+  for(const w of words){const t=cur?cur+" "+w:w;if(ctx.measureText(t).width>max&&cur){out.push(cur);cur=w}else cur=t}
+  if(cur)out.push(cur);return out;
+}
+async function scDraw(){
+  const h=scHaiku();if(!h)return;const my=++scSeq;
+  const [W,H]=SC_FMT[sc.fmt]; const cv=$("#sc-canvas"); cv.width=W; cv.height=H; const ctx=cv.getContext("2d");
+  const poem=(h.text||h.jp||"").replace(/\s+$/,""); const isJp=!h.text&&!!h.jp;
+  const POEM='"Shippori Mincho","Hiragino Mincho ProN","Yu Mincho",Georgia,serif', UI='"Zen Kaku Gothic New","Hiragino Sans","Helvetica Neue",Arial,sans-serif';
+  try{await Promise.all([document.fonts.load('400 60px "Shippori Mincho"',poem+"春夏秋冬"),document.fonts.load('400 30px "Zen Kaku Gothic New"',"0123456789 abcdefghijklmnopqrstuvwxyzãçéêíóôõú·—@")])}catch(e){}
+  if(my!==scSeq)return;
+  const sea=h.season||null, seaCol=sea?SC_SEA[sea]:"#2f4b78";
+  const pal=sc.bg==="noite"?{bg:"#161a19",ink:"#ecebe4",soft:"#9aa29d",acc:sea?{primavera:"#e08aae",verao:"#e3a552",outono:"#dd8462",inverno:"#8fb2cf"}[sea]:"#9db4dc"}
+    :sc.bg==="estacao"?{bg:seaCol,ink:"#fbf8f0",soft:"rgba(251,248,240,.74)",acc:"#fbf8f0"}
+    :{bg:"#f6f3ea",ink:"#1d211f",soft:"#6f7671",acc:seaCol};
+  ctx.fillStyle=pal.bg;ctx.fillRect(0,0,W,H);
+  const M=Math.round(W*0.1);
+  // estação em kanji, discreto, no alto
+  if(sc.show.season&&sea){ctx.fillStyle=pal.acc;ctx.font=`400 ${Math.round(W*0.05)}px ${POEM}`;ctx.textBaseline="top";ctx.textAlign="left";ctx.fillText(SC_KANJI[sea],M,M*0.9)}
+  // poema: maior fonte que caiba
+  const raw=poem.split("\n").map(l=>l.trim()).filter(Boolean);
+  let fs=Math.round(W*(sc.fmt==="st"?0.07:0.064)),lines=[];const maxW=W-2*M;
+  // primeiro diminui a letra; só quebra o verso se nem no tamanho mínimo couber
+  for(;fs>=40;fs-=2){ctx.font=`400 ${fs}px ${POEM}`;lines=raw;
+    if(!lines.some(l=>ctx.measureText(l).width>maxW)&&lines.length*fs*1.8<H*0.6)break}
+  if(fs<40){fs=40;ctx.font=`400 ${fs}px ${POEM}`;lines=raw.flatMap(l=>scWrap(ctx,l,maxW))}
+  ctx.font=`400 ${fs}px ${POEM}`;ctx.fillStyle=pal.ink;ctx.textBaseline="alphabetic";ctx.textAlign="left";
+  const lh=fs*1.8, blockW=Math.max(...lines.map(l=>ctx.measureText(l).width),1), x0=Math.round((W-blockW)/2);
+  const blockH=lh*(lines.length-1)+fs; let y=Math.round((H-blockH)/2+fs*0.85-(sc.fmt==="st"?H*0.02:0));
+  lines.forEach(l=>{ctx.fillText(l,x0,y);y+=lh});
+  // rodapé: data · estação · kigo  |  assinatura
+  const parts=[];
+  if(sc.show.num&&h.n!=null)parts.push("nº "+h.n);
+  if(sc.show.date&&h.date)parts.push(fmtDate(h.date));
+  if(sc.show.season&&sea)parts.push(SLABEL[sea].toLocaleLowerCase("pt-BR"));
+  const kg=sc.show.kigo?scKigo(h):""; if(kg)parts.push("kigo: "+kg);
+  const sig=$("#sc-sig").value.trim();
+  const fy=H-M*0.95, ms=Math.round(W*0.028);
+  ctx.textBaseline="alphabetic";ctx.font=`400 ${ms}px ${UI}`;ctx.fillStyle=pal.soft;
+  const metaTxt=parts.join(" · "), sigFont=`400 ${Math.round(ms*1.15)}px ${POEM}`;
+  const metaW=ctx.measureText(metaTxt).width; ctx.font=sigFont; const sigW=sig?ctx.measureText("— "+sig).width:0; ctx.font=`400 ${ms}px ${UI}`;
+  const oneLine=!sig||!parts.length||metaW+sigW+ms*2<=W-2*M;
+  if(sig){ctx.textAlign="right";ctx.fillStyle=pal.ink;ctx.font=sigFont;ctx.fillText("— "+sig,W-M,fy);ctx.font=`400 ${ms}px ${UI}`;ctx.fillStyle=pal.soft}
+  const my2=oneLine?fy:fy-ms*1.9;
+  if(parts.length){ctx.textAlign="left";ctx.fillText(parts.join(" · "),M,my2)}
+  if(parts.length||sig){ctx.fillStyle=pal.acc;ctx.fillRect(M,(parts.length?my2:fy)-ms*2.3,Math.round(W*0.06),3)}
+  scBlob=null; cv.toBlob(b=>{if(my===scSeq)scBlob=b},"image/png");
+}
+function scName(){const h=scHaiku();return "haicai"+(h&&h.n!=null?"-"+h.n:"")+".png"}
+function scDownload(){if(!scBlob){toast("Preparando a imagem… tente de novo.");return}
+  const a=document.createElement("a");a.href=URL.createObjectURL(scBlob);a.download=scName();document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1500)}
+function scShare(){
+  if(!scBlob){toast("Preparando a imagem… tente de novo.");return}
+  const file=new File([scBlob],scName(),{type:"image/png"});
+  if(navigator.canShare&&navigator.canShare({files:[file]})){navigator.share({files:[file]}).catch(()=>{});return}
+  scDownload(); toast("Imagem salva. Agora é só postar.");
+}
+$("#sc-format").addEventListener("click",e=>{const b=e.target.closest("[data-v]");if(!b)return;sc.fmt=b.dataset.v;store.set("hk.card",sc);scSync();scDraw()});
+$("#sc-bg").addEventListener("click",e=>{const b=e.target.closest("[data-v]");if(!b)return;sc.bg=b.dataset.v;store.set("hk.card",sc);scSync();scDraw()});
+$("#sc-show").addEventListener("change",e=>{const i=e.target.closest("input");if(!i)return;sc.show[i.dataset.k]=i.checked;store.set("hk.card",sc);scDraw()});
+let scT;$("#sc-sig").addEventListener("input",()=>{store.set("hk.sig",$("#sc-sig").value);clearTimeout(scT);scT=setTimeout(scDraw,200)});
+$("#sc-close").addEventListener("click",goHome);
+$("#sc-save").addEventListener("click",scDownload);
+$("#sc-share").addEventListener("click",scShare);
+
 /* ---------- páginas ---------- */
 function setView(v){
   view=v; document.body.dataset.view=v;
   const show=(sel,on)=>{const el=$(sel);if(el)el.hidden=!on};
-  show("#composer",v==="escrever"); show("#cloud",v==="nuvem"); show("#bookform",v==="livreto");
+  show("#composer",v==="escrever"); show("#cloud",v==="nuvem"); show("#bookform",v==="livreto"); show("#sharecard",v==="cartao");
   show("#featured",v==="haicais"); show(".bar",v==="haicais"||v==="kigos"); show("#tabs",v==="haicais");
   show(".listinfo",v==="haicais"); show("#list",v==="haicais"||v==="kigos"); show("#kigos-head",v==="kigos");
   if(v!=="escrever")editingId=null;
