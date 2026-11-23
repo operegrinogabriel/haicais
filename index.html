@@ -169,6 +169,9 @@ mark{background:color-mix(in srgb,var(--accent) 22%,transparent);color:inherit;b
 .btn.icon{width:38px;height:38px;padding:0;justify-content:center;font-size:16px}
 .btn.icon .kj{font-family:var(--f-poem);font-size:17px;color:var(--accent);line-height:1}
 .top-actions{align-items:center}
+.btn.icon[aria-current="page"]{border-color:var(--accent);background:var(--accent-soft);color:var(--accent)}
+.btn.primary[aria-current="page"]{box-shadow:0 0 0 3px var(--accent-soft)}
+.page-title{font-family:var(--f-poem);font-size:24px;font-weight:600;margin:18px 0 4px}
 /* menu */
 #menu{position:fixed;inset:0;z-index:40}
 .menu-back{position:absolute;inset:0;background:rgba(10,12,11,.38)}
@@ -229,6 +232,7 @@ footer{padding-block:40px 60px;color:var(--ink-3);font-size:12px;text-align:cent
       </div>
       <div class="top-actions">
         <button class="btn icon" id="btn-menu" type="button" aria-label="Menu" title="Menu"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+        <button class="btn icon" id="btn-home" type="button" aria-label="Meus haicais" title="Meus haicais"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h4"/></svg></button>
         <button class="btn icon" id="btn-kigos" type="button" aria-label="Saijiki (kigos)" title="Saijiki · kigos"><span class="kj" lang="ja">季</span></button>
         <button class="btn icon" id="btn-book-top" type="button" aria-label="Fazer livreto" title="Fazer livreto"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 5.5c2.8-1.3 6.2-1.3 10 .8 3.8-2.1 7.2-2.1 10-.8v13c-2.8-1.3-6.2-1.3-10 .8-3.8-2.1-7.2-2.1-10-.8z"/><path d="M12 6.3v13"/></svg></button>
         <button class="btn icon" id="btn-cloud" type="button" aria-label="Nuvem e backup" title="Nuvem e backup"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 18.5h10.5a4 4 0 0 0 .6-7.95A6 6 0 0 0 6.6 9.1 4.75 4.75 0 0 0 7 18.5z"/></svg></button>
@@ -301,6 +305,7 @@ footer{padding-block:40px 60px;color:var(--ink-3);font-size:12px;text-align:cent
   <div id="featured"></div>
 </div>
 
+<div class="wrap" id="kigos-head" hidden><h2 class="page-title">Saijiki <span lang="ja" style="color:var(--accent);font-size:.7em">歳時記</span></h2></div>
 <div class="bar">
   <div class="wrap">
     <label class="search">
@@ -315,7 +320,7 @@ footer{padding-block:40px 60px;color:var(--ink-3);font-size:12px;text-align:cent
 <main class="wrap">
   <div class="listinfo">
     <span id="count"></span>
-    <span class="row" style="gap:4px"><button class="btn ghost book" id="btn-book" type="button">📖 Livreto</button><button class="btn ghost" id="btn-order" type="button"></button></span>
+    <button class="btn ghost" id="btn-order" type="button"></button>
   </div>
   <section id="bookform" hidden aria-label="Fazer livreto">
     <h2>Fazer livreto<span lang="ja">句集</span></h2>
@@ -417,7 +422,8 @@ const store={get(k,d){try{const v=localStorage.getItem(k);return v==null?d:JSON.
 
 const C=window.Caderno;       // armazenamento local + nuvem (store.js)
 let canWrite=true;
-let st={tab:store.get("hk.tab","todos"),q:"",order:store.get("hk.order","desc"),ks:"todas",kc:"todas",kmine:false};
+let view="haicais";
+let st={tab:(t=>t==="kigos"?"todos":t)(store.get("hk.tab","todos")),q:"",order:store.get("hk.order","desc"),ks:"todas",kc:"todas",kmine:false};
 let editingId=null, seasonManual=false, confirmId=null, featured=null;
 
 /* estações do hemisfério sul */
@@ -478,7 +484,7 @@ function renderTabs(items){
   const counts={todos:items.length};SEASONS.forEach(([k])=>counts[k]=items.filter(h=>h.season===k).length);
   $("#tabs").innerHTML=[["todos","Todos"],...SEASONS].map(([k,l])=>
     `<button class="tab ${k!=="todos"?"c-"+k:""}" role="tab" data-tab="${k}" aria-selected="${st.tab===k}" style="${k!=="todos"?"--tab-c:var(--s-"+k+")":""}">${k!=="todos"?'<span class="dot"></span>':""}${l}<span class="c">${counts[k]}</span></button>`).join("")
-    +`<span class="tab-sep" aria-hidden="true"></span><button class="tab" role="tab" data-tab="kigos" aria-selected="${st.tab==="kigos"}" style="--tab-c:var(--accent)"><span lang="ja" class="tab-jp">季</span>Kigos<span class="c">${kigos.length||""}</span></button>`;
+;
 }
 
 /* ---------- dicionário de kigos ---------- */
@@ -503,7 +509,7 @@ function renderKigos(items){
   if(st.kmine) list=list.filter(k=>counts.has(k.t));
   const chip=(grp,v,l,cls="")=>`<button type="button" class="chip ${cls}" data-act="kf" data-g="${grp}" data-v="${v}" aria-pressed="${st[grp]===v}">${cls?'<span class="dot"></span>':""}${l}</button>`;
   let html=`<div class="kigo-head">
-    <p class="kigo-intro"><span lang="ja">歳時記</span> · Saijiki brasileiro com ${kigos.length} termos de estação, separados por estação e categoria. Toque num kigo para ver os seus haicais com ele.</p>
+    <p class="kigo-intro">Saijiki brasileiro com ${kigos.length} termos de estação, separados por estação e categoria. Toque num kigo para ver os seus haicais com ele.</p>
     <div class="chips">${chip("ks","todas","Todas")}${SEASONS.map(([k,l])=>chip("ks",k,l,"c-"+k)).join("")}</div>
     <div class="chips">${chip("kc","todas","Todos os temas")}${Object.entries(KCAT).map(([k,l])=>chip("kc",k,l)).join("")}</div>
     <label class="mine"><input type="checkbox" id="k-mine" ${st.kmine?"checked":""}> Só os que aparecem nos meus haicais</label>
@@ -597,11 +603,10 @@ function openComposer(h){
   $("#f-more").open=!!(h&&(h.note||h.jp||h.romaji||h.place));
   seasonManual=!!(h&&h.season&&h.season!==seasonOf(h.date));
   renderSeasonChips(h?h.season:seasonOf(todayISO()));
-  $("#composer").hidden=false; updateSyl();
-  $("#composer").scrollIntoView({behavior:"smooth",block:"start"});
+  setView("escrever"); updateSyl();
   setTimeout(()=>$("#f-text").focus({preventScroll:true}),250);
 }
-function closeComposer(){$("#composer").hidden=true;editingId=null}
+function closeComposer(){editingId=null;setView("haicais")}
 /* escansão: sílabas poéticas, com sinalefa, contando até a última tônica do verso */
 const SC_V="aeiouáéíóúâêôãõàü";
 const SC_ONSET=["bl","br","cl","cr","dl","dr","fl","fr","gl","gr","pl","pr","tl","tr","vl","vr","ch","lh","nh","qu","gu"];
@@ -690,7 +695,7 @@ function exportText(){
 
 /* ---------- eventos ---------- */
 let toastT;function toast(m){const t=$("#toast");t.textContent=m;t.hidden=false;clearTimeout(toastT);toastT=setTimeout(()=>t.hidden=true,2600)}
-$("#tabs").addEventListener("click",e=>{const b=e.target.closest("[data-tab]");if(!b)return;st.tab=b.dataset.tab;store.set("hk.tab",st.tab);render();window.scrollTo({top:$(".bar").offsetTop-2,behavior:"smooth"})});
+$("#tabs").addEventListener("click",e=>{const b=e.target.closest("[data-tab]");if(!b)return;st.tab=b.dataset.tab;store.set("hk.tab",st.tab);store.set("hk.lasttab",st.tab);render();window.scrollTo({top:$(".bar").offsetTop-2,behavior:"smooth"})});
 let qT;$("#q").addEventListener("input",e=>{st.q=e.target.value;$("#q-clear").hidden=!st.q;clearTimeout(qT);qT=setTimeout(render,120)});
 $("#q-clear").addEventListener("click",()=>{st.q="";$("#q").value="";$("#q-clear").hidden=true;render();$("#q").focus()});
 $("#btn-order").addEventListener("click",()=>{st.order=st.order==="desc"?"asc":"desc";store.set("hk.order",st.order);render()});
@@ -701,7 +706,7 @@ $("#f-text").addEventListener("input",()=>{updateSyl();if(!editingId)store.set("
 $("#composer").addEventListener("keydown",e=>{if(e.key==="Enter"&&(e.metaKey||e.ctrlKey)){e.preventDefault();save()}if(e.key==="Escape")closeComposer()});
 $("#f-date").addEventListener("change",()=>{if(!seasonManual)renderSeasonChips(seasonOf($("#f-date").value))});
 $("#f-season").addEventListener("click",e=>{const b=e.target.closest("[data-season]");if(!b)return;seasonManual=true;renderSeasonChips(b.dataset.season)});
-function randomPick(){const items=all().filter(h=>h.text||h.jp);featured=items[Math.floor(Math.random()*items.length)]?.id;renderFeatured();$("#featured").scrollIntoView({behavior:"smooth",block:"nearest"})}
+function randomPick(){if(view!=="haicais")setView("haicais");const items=all().filter(h=>h.text||h.jp);featured=items[Math.floor(Math.random()*items.length)]?.id;renderFeatured();$("#featured").scrollIntoView({behavior:"smooth",block:"nearest"})}
 
 document.addEventListener("click",e=>{
   const b=e.target.closest("[data-act]");if(!b)return;const a=b.dataset.act,id=b.dataset.id;
@@ -714,7 +719,7 @@ document.addEventListener("click",e=>{
   else if(a==="close-feat"){featured=null;renderFeatured()}
   else if(a==="hide-day"){store.set("hk.hideday-"+todayISO(),true);renderFeatured()}
   else if(a==="kf"){st[b.dataset.g]=b.dataset.v;render()}
-  else if(a==="kigo"){st.tab="todos";store.set("hk.tab","todos");st.q=b.dataset.term;$("#q").value=st.q;$("#q-clear").hidden=false;render();window.scrollTo({top:$(".bar").offsetTop-2,behavior:"smooth"})}
+  else if(a==="kigo"){st.q=b.dataset.term;$("#q").value=st.q;$("#q-clear").hidden=false;st.tab="todos";store.set("hk.tab","todos");setView("haicais");render()}
 });
 document.addEventListener("change",e=>{if(e.target.id==="k-mine"){st.kmine=e.target.checked;render()}});
 function saveFile(name,text,type){
@@ -733,6 +738,8 @@ $("#f-import").addEventListener("change",async e=>{
   try{const r=await C.importPack(JSON.parse(await f.text()));toast(r.added+" haicais importados"+(r.kept?" · "+r.kept+" já estavam aqui":"")+".")}
   catch(err){toast("Este arquivo não é um backup do caderno.")}
 });
+
+setView("haicais");
 
 /* ---------- carregar ---------- */
 function setStatus(m){const s=$("#status");s.textContent=m||"";s.hidden=!m}
@@ -878,8 +885,7 @@ function openBookForm(){
   if(st.q.trim()) bk.mode="busca"; else if(bk.mode==="busca") bk.mode="todo";
   document.querySelectorAll("#bk-show input").forEach(i=>i.checked=!!bk.show[i.dataset.k]);
   bkTitleEdited=false;
-  $("#bookform").hidden=false; bkUpdate();
-  $("#bookform").scrollIntoView({behavior:"smooth",block:"start"});
+  setView("livreto"); bkUpdate();
 }
 function bkKigoOf(h){if(h.kigo)return h.kigo;if(!kigos.length||!h.text)return "";const k=findKigos(h.text)[0];return k?k.t:""}
 function bkHaiku(h){
@@ -921,8 +927,7 @@ function showBook(){
   $("#bookview").hidden=false; $("#bookview").scrollTop=0; document.documentElement.style.overflow="hidden";
 }
 function closeBook(){$("#bookview").hidden=true;document.documentElement.style.overflow=""}
-$("#btn-book").addEventListener("click",()=>{if($("#bookform").hidden)openBookForm();else $("#bookform").hidden=true});
-$("#bk-close").addEventListener("click",()=>{$("#bookform").hidden=true});
+$("#bk-close").addEventListener("click",goHome);
 $("#bookform").addEventListener("click",e=>{
   const c=e.target.closest(".chip");if(!c)return;
   const g=c.parentElement.id; if(g==="bk-mode"){bk.mode=c.dataset.v;bkTitleEdited=false}else if(g==="bk-paper")bk.paper=c.dataset.v;else if(g==="bk-order")bk.order=c.dataset.v;
@@ -940,8 +945,25 @@ $("#bk-dl").addEventListener("click",()=>{
 });
 document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!$("#bookview").hidden)closeBook()});
 
+/* ---------- páginas ---------- */
+function setView(v){
+  view=v; document.body.dataset.view=v;
+  const show=(sel,on)=>{const el=$(sel);if(el)el.hidden=!on};
+  show("#composer",v==="escrever"); show("#cloud",v==="nuvem"); show("#bookform",v==="livreto");
+  show("#featured",v==="haicais"); show(".bar",v==="haicais"||v==="kigos"); show("#tabs",v==="haicais");
+  show(".listinfo",v==="haicais"); show("#list",v==="haicais"||v==="kigos"); show("#kigos-head",v==="kigos");
+  if(v!=="escrever")editingId=null;
+  if(v==="kigos"){if(st.tab!=="kigos"){st.tab="kigos";render()}}
+  else if(st.tab==="kigos"){st.tab=store.get("hk.lasttab","todos");if(st.tab==="kigos")st.tab="todos";render()}
+  const cur={haicais:"#btn-home",kigos:"#btn-kigos",livreto:"#btn-book-top",nuvem:"#btn-cloud",escrever:"#btn-write"}[v];
+  document.querySelectorAll(".top-actions .btn").forEach(b=>b.removeAttribute("aria-current"));
+  if(cur)$(cur).setAttribute("aria-current","page");
+  window.scrollTo(0,0);
+}
+function goHome(){setView("haicais")}
+
 /* ---------- menu e atalhos do topo ---------- */
-function goTab(t){st.tab=t;store.set("hk.tab",t);render();window.scrollTo({top:$(".bar").offsetTop-2,behavior:"smooth"})}
+function goTab(t){if(t==="kigos"){setView("kigos");return}st.tab=t;store.set("hk.tab",t);store.set("hk.lasttab",t);setView("haicais");render()}
 function openMenu(){
   const items=all();
   const c={todos:items.length,fav:items.filter(h=>h.fav).length,kigos:kigos.length||""};
@@ -953,8 +975,9 @@ function openMenu(){
 }
 function closeMenu(){$("#menu").hidden=true;document.documentElement.style.overflow=""}
 $("#btn-menu").addEventListener("click",openMenu);
-$("#btn-kigos").addEventListener("click",()=>{st.q="";$("#q").value="";$("#q-clear").hidden=true;goTab("kigos")});
-$("#btn-book-top").addEventListener("click",()=>{if($("#bookform").hidden)openBookForm();else $("#bookform").hidden=true});
+$("#btn-kigos").addEventListener("click",()=>{st.q="";$("#q").value="";$("#q-clear").hidden=true;setView("kigos")});
+$("#btn-home").addEventListener("click",goHome);
+$("#btn-book-top").addEventListener("click",()=>openBookForm());
 $("#menu").addEventListener("click",e=>{
   const b=e.target.closest("[data-go]");if(!b)return;
   const g=b.dataset.go; closeMenu(); if(g==="close")return;
@@ -990,7 +1013,7 @@ function renderCloud(){
   $("#cloud-login").hidden=!C.cloudEnabled||!!s.email;
   $("#cloud-in").hidden=!C.cloudEnabled||!s.email;
 }
-function toggleCloud(show){const el=$("#cloud");el.hidden=show===undefined?!el.hidden:!show;if(!el.hidden){renderCloud();el.scrollIntoView({behavior:"smooth",block:"nearest"})}}
+function toggleCloud(show){const on=show===undefined?view!=="nuvem":show;if(on){setView("nuvem");renderCloud()}else goHome()}
 $("#btn-cloud").addEventListener("click",()=>toggleCloud());
 $("#sync-pill").addEventListener("click",()=>toggleCloud(true));
 $("#c-close").addEventListener("click",()=>{toggleCloud(false);if($("#cloud-newpass").hidden)$("#cloud-note").textContent=""});
