@@ -138,6 +138,15 @@ mark{background:color-mix(in srgb,var(--accent) 22%,transparent);color:inherit;b
 .scan-s i{font-style:normal;color:var(--ink-3);margin:0 2px}
 .scan-s .ton{color:var(--ink);font-weight:700;text-decoration:underline;text-underline-offset:3px}
 .scan-s .post{color:var(--ink-3);opacity:.6}
+.scan-s i.j{margin:0}
+.syl i.opt{font-style:normal;color:var(--accent);font-weight:700}
+.scan-n.rng{min-width:2.6em}
+.scan-s [data-w]{cursor:pointer}
+.scan-s .fx{border-bottom:1px dotted var(--accent)}
+#scan-fix{margin-top:8px;padding:12px;border:1px solid var(--rule);border-radius:10px;display:grid;gap:8px;background:var(--paper)}
+#scan-fix input{font-size:16px}
+#scan-fix p{margin:0;font-size:12px;color:var(--ink-2)}
+#scan-fix .fx-err{color:var(--danger)}
 .kigo-found{display:flex;flex-wrap:wrap;gap:10px;font-size:12.5px;color:var(--ink-2);margin-top:4px}
 .kigo-found>span{display:inline-flex;align-items:center;gap:4px;color:var(--ink)}
 #kigo-row{display:flex;flex-direction:column;gap:6px;margin:10px 0 4px}
@@ -305,6 +314,7 @@ footer{padding-block:40px 60px;color:var(--ink-3);font-size:12px;text-align:cent
       </div>
     </details>
     <div class="syl" id="syl" aria-live="polite"></div>
+    <div id="scan-fix" hidden></div>
     <div class="composer-foot">
       <span></span>
       <div class="row">
@@ -657,7 +667,7 @@ function openComposer(h){
   seasonManual=!!(h&&h.season&&h.season!==seasonOf(h.date));
   kigoPick=h&&h.kigo?foldStr(h.kigo):null; kigoOff=new Set();
   renderSeasonChips(h?h.season:seasonOf(todayISO()));
-  setView("escrever"); updateSyl();
+  closeFix(); setView("escrever"); updateSyl();
   setTimeout(()=>$("#f-text").focus({preventScroll:true}),250);
 }
 function closeComposer(){editingId=null;setView("haicais")}
@@ -684,29 +694,80 @@ function scWord(w){
   const find=re=>{for(let k=0;k<nuc.length;k++){const seg=ch.slice(nuc[k][0],nuc[k][1]+1).join("");if(re.test(seg))return k}return -1};
   st=find(/[áéíóúâêô]/); if(st<0) st=find(/[ãõ]/);
   if(st<0){st=nuc.length===1?0:(/(a|e|o|as|es|os|am|em|ens)$/.test(w)?nuc.length-2:nuc.length-1)}
-  return {syl,stress:st};
+  // i/u átono seguido de vogal (pi-a-no, su-a-ve, gló-ri-a): pode virar uma sílaba só
+  const opt=[];
+  for(let k=1;k<nuc.length;k++){const p=nuc[k-1];if(p[0]===p[1]&&p[1]+1===nuc[k][0]&&"iu".includes(ch[p[1]])&&k-1!==st)opt.push(k)}
+  return {syl,stress:st,opt};
+}
+/* correções do poeta: palavra -> "sa-u-da-de", valem para todos os haicais */
+const SC_ATONO=new Set("a o as os e de da do das dos em na no nas nos num um uns que se me te lhe lhes vos por com sem mas ou nem à às ao aos pra pro pras pros sob".split(" "));
+let scFix={};
+function scWordFixed(w){
+  const r=scWord(w),f=scFix[w];
+  if(!f)return r;
+  const syl=f.split("-").filter(Boolean),post=r.syl.length-1-r.stress;
+  return {syl,stress:Math.max(0,syl.length-1-post),opt:[],fixed:true};
 }
 function scanLine(line){
   const words=line.toLowerCase().replace(/[^a-záéíóúâêôãõàüç\s-]/g," ").split(/[\s-]+/).filter(w=>/[aeiouáéíóúâêôãõàü]/.test(w));
   if(!words.length) return null;
-  const units=[];let lastStress=0;
-  words.forEach((w,wi)=>{const r=scWord(w);let start=units.length;
-    r.syl.forEach((s,k)=>{
-      if(k===0&&units.length){const prev=units[units.length-1];
-        if(/[aeiouáéíóúâêô]h?$/.test(prev.t)&&!/(ão|ãe|õe)$/.test(prev.t)&&/^h?[aeiouáéíóúâêôãõ]/.test(s)){prev.t+="‿"+s;prev.w=wi;start=units.length-1;return}}
-      units.push({t:s,w:wi,k})});
-    if(wi===words.length-1) lastStress=start+r.stress;
+  // S: sílabas; J[i] entre S[i] e S[i+1]: 0 separadas, 1 junção, 2 junção opcional entre palavras, 3 junção opcional dentro da palavra
+  const S=[],J=[];let stressPos=0;
+  words.forEach((w,wi)=>{const r=scWordFixed(w),base=S.length;
+    r.syl.forEach((t,k)=>{
+      if(k===0&&S.length){const prev=S[S.length-1];let j=0;
+        if(/[aeiouáéíóúâêô]h?$/.test(prev.t)&&!/(ão|ãe|õe)$/.test(prev.t)&&/^h?[aeiouáéíóúâêôãõ]/.test(t)){
+          const pr=prev.r,prevTonic=!SC_ATONO.has(prev.w)&&pr.stress===pr.syl.length-1,nextTonic=!SC_ATONO.has(w)&&r.stress===0;
+          j=prevTonic||nextTonic?2:1}
+        J.push(j)}
+      else if(k>0) J.push(r.opt.includes(k)?3:0);
+      S.push({t,w,r});
+    });
+    if(wi===words.length-1) stressPos=base+r.stress;
   });
-  return {count:lastStress+1,units,stress:lastStress};
+  let min=1,opt=0;for(let i=0;i<stressPos;i++){if(J[i]===0)min++;else if(J[i]>=2)opt++}
+  const units=[];
+  S.forEach((x,i)=>{if(i===0||J[i-1]===0)units.push({parts:[],idx:[]});const u=units[units.length-1];
+    if(i>0&&J[i-1]>0)u.parts.push(`<i class="j${J[i-1]>=2?" opt":""}">‿</i>`);
+    u.parts.push(`<span data-w="${esc(x.w)}"${x.r.fixed?' class="fx"':""}>${esc(x.t)}</span>`);u.idx.push(i)});
+  const su=units.findIndex(u=>u.idx.includes(stressPos));
+  return {min,max:min+opt,units,su};
 }
 function updateSyl(){
   const lines=$("#f-text").value.split("\n").filter(l=>l.trim());
+  scFix=(C.getDoc&&C.getDoc("__silabas")||{}).map||{};
   const rows=lines.map(l=>{const r=/[\u3040-\u30ff\u4e00-\u9fff]/.test(l)?null:scanLine(l);
     if(!r) return "";
-    return `<div class="scan-row"><span class="scan-n">${r.count}</span><span class="scan-s">${r.units.map((u,i)=>`<span class="${i>r.stress?"post":i===r.stress?"ton":""}">${esc(u.t)}</span>`).join('<i>/</i>')}</span></div>`}).filter(Boolean);
-  $("#syl").innerHTML=rows.length?`<div class="scan-head">Escansão <span class="hint">sílabas poéticas até a última tônica · ‿ junção de vogais</span></div>${rows.join("")}`:"";
+    const n=r.min===r.max?r.min:r.min+"–"+r.max;
+    return `<div class="scan-row"><span class="scan-n${r.min===r.max?"":" rng"}" title="${r.min===r.max?"":"depende de juntar ou não as vogais marcadas"}">${n}</span><span class="scan-s">${r.units.map((u,i)=>`<span class="u${i>r.su?" post":i===r.su?" ton":""}">${u.parts.join("")}</span>`).join('<i>/</i>')}</span></div>`}).filter(Boolean);
+  $("#syl").innerHTML=rows.length?`<div class="scan-head">Escansão <span class="hint">sílabas poéticas até a última tônica · ‿ junção de vogais · <i class="opt">‿</i> junção opcional · toque numa palavra para corrigir a divisão</span></div>${rows.join("")}`:"";
   updateKigo();
 }
+let fixWord=null;
+function openFix(w){
+  fixWord=w;const auto=scWord(w).syl.join("-"),cur=scFix[w]||auto,box=$("#scan-fix");
+  box.innerHTML=`<label class="field">Divisão de “${esc(w)}”<input id="fx-in" value="${esc(cur)}" autocomplete="off" autocapitalize="off" spellcheck="false" inputmode="text"></label>
+    <p>Separe as sílabas com hífen, do jeito que você conta (ex.: sa-u-da-de). Vale para todos os seus haicais.</p>
+    <p class="fx-err" id="fx-err" hidden></p>
+    <div class="row"><button type="button" class="btn primary" data-fx="save">Guardar divisão</button>${scFix[w]?'<button type="button" class="btn" data-fx="auto">Voltar ao automático</button>':""}<button type="button" class="btn ghost" data-fx="cancel">Cancelar</button></div>`;
+  box.hidden=false;$("#fx-in").focus();box.scrollIntoView({block:"nearest",behavior:"smooth"});
+}
+function closeFix(){fixWord=null;$("#scan-fix").hidden=true;$("#scan-fix").innerHTML=""}
+async function saveFix(val){
+  const w=fixWord,map=Object.assign({},scFix);
+  if(val==null){delete map[w]}
+  else{
+    const v=val.trim().toLowerCase().replace(/\s+/g,"").replace(/[·.\/|]/g,"-").replace(/-+/g,"-").replace(/^-|-$/g,"");
+    if(v.replace(/-/g,"")!==w){const e=$("#fx-err");e.textContent="As letras precisam ser as mesmas da palavra “"+w+"”; só mude onde ficam os hífens.";e.hidden=false;return}
+    if(v===scWord(w).syl.join("-"))delete map[w];else map[w]=v;
+  }
+  try{await C.saveDoc("__silabas",{map});scFix=map;closeFix();updateSyl();toast(val==null?"Voltou à divisão automática.":"Divisão guardada para “"+w+"”.")}
+  catch(e){toast("Não foi possível guardar. Tente de novo.")}
+}
+$("#syl").addEventListener("click",e=>{const s=e.target.closest("[data-w]");if(s)openFix(s.dataset.w)});
+$("#scan-fix").addEventListener("click",e=>{const b=e.target.closest("[data-fx]");if(!b)return;const a=b.dataset.fx;
+  if(a==="save")saveFix($("#fx-in").value);else if(a==="auto")saveFix(null);else closeFix()});
+$("#scan-fix").addEventListener("keydown",e=>{if(e.key==="Enter"&&e.target.id==="fx-in"){e.preventDefault();e.stopPropagation();saveFix(e.target.value)}if(e.key==="Escape"){e.stopPropagation();closeFix()}});
 async function save(){
   const text=$("#f-text").value.replace(/\s+$/,"").replace(/^\s+/,"");
   if(!text&&!$("#f-jp").value.trim()){toast("Escreva o haicai antes de guardar.");return}

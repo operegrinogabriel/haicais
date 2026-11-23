@@ -63,7 +63,7 @@
 
   function haikus() {
     const out = [];
-    docs.forEach(r => { if (!r.deleted && r.id !== KIGOS_ID) out.push(Object.assign({}, r.data, { id: r.id })) });
+    docs.forEach(r => { if (!r.deleted && !r.id.startsWith("__")) out.push(Object.assign({}, r.data, { id: r.id })) });
     return out;
   }
 
@@ -77,6 +77,9 @@
     await putLocal([{ id, data, deleted: false, updatedAt: now, dirty: true }]);
     emit("change"); scheduleSync(800);
   }
+  /* documentos de ajustes do poeta (ex.: "__silabas"), sincronizados como os haicais */
+  function getDoc(id) { const r = docs.get(id); return r && !r.deleted ? r.data : null }
+  async function saveDoc(id, data) { return saveHaiku(id, data) }
   async function deleteHaiku(id) {
     const prev = docs.get(id);
     await putLocal([{ id, data: prev ? prev.data : {}, deleted: true, updatedAt: Date.now(), dirty: true }]);
@@ -103,7 +106,7 @@
   }
   function exportPack() {
     const hs = [];
-    docs.forEach(r => { if (!r.deleted && r.id !== KIGOS_ID) hs.push(Object.assign({ id: r.id }, r.data, { updatedAt: r.updatedAt })) });
+    docs.forEach(r => { if (!r.deleted && !r.id.startsWith("__")) hs.push(Object.assign({ id: r.id }, r.data, { updatedAt: r.updatedAt })) });
     hs.sort((a, b) => (a.ord ?? 0) - (b.ord ?? 0));
     return { format: "caderno-haicais", version: 1, exportedAt: new Date().toISOString(), haikus: hs };
   }
@@ -241,7 +244,7 @@
   window.Caderno = {
     ready: load().then(async () => { let r = null; try { r = await handleRedirect() } catch (e) { r = { error: "link", message: e.message } } scheduleSync(200); return r }),
     haikus, get kigos() { return kigos }, status, version: () => docs.size + ":" + status.pending + ":" + kigos.length,
-    onChange: f => listeners.add(f), saveHaiku, deleteHaiku, importPack, exportPack,
+    onChange: f => listeners.add(f), saveHaiku, deleteHaiku, getDoc, saveDoc, importPack, exportPack,
     login, signup, logout, recover, updatePassword, syncNow: () => sync(), cloudEnabled: CLOUD_ON,
   };
 })();
