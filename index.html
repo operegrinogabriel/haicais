@@ -2,13 +2,14 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
+<script>try{var t=JSON.parse(localStorage.getItem("hk.theme"));if(t==="light"||t==="dark"){document.documentElement.dataset.theme=t}}catch(e){}</script>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Haicais">
 <meta name="theme-color" content="#f5f4f0" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#111110" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#1d1c1a" media="(prefers-color-scheme: dark)">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" href="icon-192.png">
@@ -34,15 +35,15 @@
   --paper:var(--bg); --sheet:var(--surface); --rule:var(--line); --accent-soft:var(--soft);
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
-  --bg:#111110; --surface:#1c1c1a; --soft:#282724; --ink:#f1f0eb; --ink-2:#aaa79f; --ink-3:#77746d; --line:#2c2b28; --on-ink:#111110;
-  --s-primavera:#a6c19f; --b-primavera:#1f261d; --s-verao:#dcb676; --b-verao:#2a2418; --s-outono:#d59d85; --b-outono:#2b201b; --s-inverno:#a2b6c9; --b-inverno:#1c232a;
-  --accent:#93b0d4; --danger:#e58a77; --ok:#a6c19f; --ok-bg:#1f261d;
-  --shadow:none; --shadow-s:none; --glass:rgba(32,32,30,.82); --glass-b:rgba(255,255,255,.07); color-scheme:dark}}
+  --bg:#1d1c1a; --surface:#272623; --soft:#33312d; --ink:#eeece6; --ink-2:#b4b0a7; --ink-3:#88847c; --line:#3a3833; --on-ink:#1d1c1a;
+  --s-primavera:#a9c3a2; --b-primavera:#2a3327; --s-verao:#ddb877; --b-verao:#3a3122; --s-outono:#d8a089; --b-outono:#3b2c25; --s-inverno:#a6b9cb; --b-inverno:#283039;
+  --accent:#9cb7d8; --danger:#e8907d; --ok:#a9c3a2; --ok-bg:#2a3327; --gold:#d9a640;
+  --shadow:0 1px 2px rgba(0,0,0,.18),0 8px 24px rgba(0,0,0,.14); --shadow-s:0 1px 2px rgba(0,0,0,.22); --glass:rgba(44,43,40,.84); --glass-b:rgba(255,255,255,.07); color-scheme:dark}}
 :root[data-theme="dark"]{
-  --bg:#111110; --surface:#1c1c1a; --soft:#282724; --ink:#f1f0eb; --ink-2:#aaa79f; --ink-3:#77746d; --line:#2c2b28; --on-ink:#111110;
-  --s-primavera:#a6c19f; --b-primavera:#1f261d; --s-verao:#dcb676; --b-verao:#2a2418; --s-outono:#d59d85; --b-outono:#2b201b; --s-inverno:#a2b6c9; --b-inverno:#1c232a;
-  --accent:#93b0d4; --danger:#e58a77; --ok:#a6c19f; --ok-bg:#1f261d;
-  --shadow:none; --shadow-s:none; --glass:rgba(32,32,30,.82); --glass-b:rgba(255,255,255,.07); color-scheme:dark}
+  --bg:#1d1c1a; --surface:#272623; --soft:#33312d; --ink:#eeece6; --ink-2:#b4b0a7; --ink-3:#88847c; --line:#3a3833; --on-ink:#1d1c1a;
+  --s-primavera:#a9c3a2; --b-primavera:#2a3327; --s-verao:#ddb877; --b-verao:#3a3122; --s-outono:#d8a089; --b-outono:#3b2c25; --s-inverno:#a6b9cb; --b-inverno:#283039;
+  --accent:#9cb7d8; --danger:#e8907d; --ok:#a9c3a2; --ok-bg:#2a3327; --gold:#d9a640;
+  --shadow:0 1px 2px rgba(0,0,0,.18),0 8px 24px rgba(0,0,0,.14); --shadow-s:0 1px 2px rgba(0,0,0,.22); --glass:rgba(44,43,40,.84); --glass-b:rgba(255,255,255,.07); color-scheme:dark}
 *,*::before,*::after{box-sizing:border-box}
 html,body{margin:0;background:var(--bg);color:var(--ink)}
 [hidden]{display:none!important}
@@ -255,6 +256,11 @@ details.more[open] summary::after{content:"–"}
 .vrow .chev{color:var(--ink-3);margin-left:6px}
 .vrow .vc + .chev{margin-left:0}
 .vrow .vc:empty + .chev{margin-left:auto}
+.seg{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;background:var(--surface);border-radius:18px;padding:5px;box-shadow:var(--shadow)}
+.seg button{border:0;background:none;border-radius:14px;padding:11px 6px;font-size:14px;font-weight:600;color:var(--ink-2);display:flex;align-items:center;justify-content:center;gap:7px;cursor:pointer}
+.seg button svg.i{width:18px;height:18px}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--on-ink)}
+.seg-hint{margin:8px 4px 0;font-size:12.5px;color:var(--ink-3)}
 #cloud{margin-top:22px;background:var(--surface);border-radius:22px;padding:18px;box-shadow:var(--shadow);display:grid;gap:12px}
 #cloud h2{margin:0;font-size:18px;font-weight:800;letter-spacing:-.02em;display:flex;flex-direction:column;align-items:flex-start;gap:6px}
 .sync-line{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;font-weight:600;color:var(--ink-2);letter-spacing:0}
@@ -405,6 +411,13 @@ footer{padding-block:34px 10px;color:var(--ink-3);font-size:12px;text-align:cent
         <button class="btn ghost" id="c-logout" type="button">Sair</button>
       </div>
     </section>
+    <p class="vh">Aparência</p>
+    <div class="seg" id="theme-seg" role="group" aria-label="Aparência">
+      <button type="button" data-theme-v="light"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M4.6 4.6l1.4 1.4M18 18l1.4 1.4M2.5 12h2M19.5 12h2M4.6 19.4 6 18M18 6l1.4-1.4"/></svg>Claro</button>
+      <button type="button" data-theme-v="dark"><svg class="i" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg>Escuro</button>
+      <button type="button" data-theme-v="auto"><svg class="i" viewBox="0 0 24 24"><rect x="6" y="2.5" width="12" height="19" rx="3"/><path d="M10.5 18.5h3"/></svg>Automático</button>
+    </div>
+    <p class="seg-hint" id="theme-hint"></p>
     <p class="vh">Cópias</p>
     <div class="vgroup">
       <button class="vrow" type="button" id="btn-export"><span class="vi"><svg class="i" viewBox="0 0 24 24"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg></span>Baixar em texto (.txt)</button>
@@ -1307,6 +1320,18 @@ document.querySelectorAll(".tabbar [data-nav]").forEach(b=>b.addEventListener("c
   if(v==="reencontro"){if(view==="reencontro")randomPick();else setView("reencontro");return}
   setView(v);
 }));
+/* aparência: claro, escuro ou automático (segue o iPhone) */
+function applyTheme(t){
+  const r=document.documentElement;
+  if(t==="light"||t==="dark")r.dataset.theme=t;else delete r.dataset.theme;
+  const dark=t==="dark"||(t!=="light"&&matchMedia("(prefers-color-scheme: dark)").matches);
+  document.querySelectorAll('meta[name="theme-color"]').forEach(m=>m.setAttribute("content",dark?"#1d1c1a":"#f5f4f0"));
+  document.querySelectorAll("#theme-seg [data-theme-v]").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.themeV===(t||"auto"))));
+  $("#theme-hint").textContent=t==="light"||t==="dark"?"":"Segue o modo claro ou escuro do aparelho.";
+}
+applyTheme(store.get("hk.theme","auto"));
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change",()=>applyTheme(store.get("hk.theme","auto")));
+$("#theme-seg").addEventListener("click",e=>{const b=e.target.closest("[data-theme-v]");if(!b)return;store.set("hk.theme",b.dataset.themeV);applyTheme(b.dataset.themeV)});
 document.querySelectorAll("#voce [data-go]").forEach(b=>b.addEventListener("click",()=>{
   const g=b.dataset.go;
   if(g==="fav"){st.q="★";$("#q").value="★";$("#q-clear").hidden=false;st.tab="todos";store.set("hk.tab","todos");setView("haicais");setSearching(true);render();if(!all().some(h=>h.fav))toast("Ainda não há favoritos: toque na estrela de um haicai.");return}
