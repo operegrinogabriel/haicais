@@ -1,0 +1,659 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Haicais">
+<meta name="theme-color" content="#f2f3ef" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#131614" media="(prefers-color-scheme: dark)">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" href="icon-192.png">
+<title>Haicais</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;600&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap">
+<style>
+/* Layout: uma coluna estreita como um caderno; barra fixa com busca e abas de estação; cada haicai respira em branco. */
+:root{
+  --paper:#f2f3ef; --sheet:#fbfbf8; --ink:#1d211f; --ink-2:#5b625e; --ink-3:#8b928d; --rule:#dfe2dc;
+  --accent:#2f4b78; --accent-soft:#e3e8f1;
+  --s-primavera:#b4507a; --s-verao:#b9741a; --s-outono:#a0482a; --s-inverno:#4a6b86;
+  --danger:#a33a2a;
+  --f-poem:"Shippori Mincho","Hiragino Mincho ProN","Yu Mincho",Georgia,serif;
+  --f-ui:"Zen Kaku Gothic New","Hiragino Sans","Helvetica Neue",Arial,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --paper:#131614; --sheet:#1a1e1c; --ink:#e7e9e4; --ink-2:#a9b0ab; --ink-3:#7a827d; --rule:#2c312e;
+  --accent:#9db4dc; --accent-soft:#232c3a;
+  --s-primavera:#e08aae; --s-verao:#e3a552; --s-outono:#dd8462; --s-inverno:#8fb2cf; --danger:#ec8a7a; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#131614; --sheet:#1a1e1c; --ink:#e7e9e4; --ink-2:#a9b0ab; --ink-3:#7a827d; --rule:#2c312e;
+  --accent:#9db4dc; --accent-soft:#232c3a;
+  --s-primavera:#e08aae; --s-verao:#e3a552; --s-outono:#dd8462; --s-inverno:#8fb2cf; --danger:#ec8a7a; color-scheme:dark}
+*,*::before,*::after{box-sizing:border-box}
+html,body{margin:0;background:var(--paper);color:var(--ink)}
+[hidden]{display:none!important}
+body{font-family:var(--f-ui);font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--paper)}
+.wrap{max-width:680px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+button,input,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
+
+/* topo */
+header.top{padding-block:28px 6px}
+.brand{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap}
+h1{font-family:var(--f-poem);font-weight:600;font-size:30px;letter-spacing:.02em;margin:0;text-wrap:balance}
+h1 .kanji{font-size:.62em;color:var(--ink-3);margin-left:.4em;letter-spacing:.1em;font-weight:400}
+.sub{color:var(--ink-2);font-size:13px;margin:2px 0 0;font-variant-numeric:tabular-nums}
+.top-actions{display:flex;gap:8px;flex-wrap:wrap}
+
+.btn{border:1px solid var(--rule);background:var(--sheet);border-radius:999px;padding:7px 14px;cursor:pointer;font-size:13px;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.btn:hover{border-color:var(--ink-3)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--sheet);font-weight:500}
+.btn.primary:hover{filter:brightness(1.08)}
+.btn.ghost{background:transparent;border-color:transparent;color:var(--ink-2);padding:5px 8px}
+.btn.ghost:hover{color:var(--ink);border-color:var(--rule)}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+
+/* barra fixa */
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--paper);padding-block:10px 0;border-bottom:1px solid var(--rule)}
+.search{position:relative}
+.search input{width:100%;box-sizing:border-box;border:1px solid var(--rule);background:var(--sheet);border-radius:10px;padding:10px 36px 10px 38px;font-size:15px}
+.search input::placeholder{color:var(--ink-3)}
+.search svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--ink-3)}
+.search .clear{position:absolute;right:6px;top:50%;transform:translateY(-50%)}
+.tabs{display:flex;gap:2px;overflow-x:auto;scrollbar-width:none;margin-top:8px}
+.tabs::-webkit-scrollbar{display:none}
+.tab{border:0;background:none;padding:9px 12px 10px;cursor:pointer;color:var(--ink-2);font-size:14px;border-bottom:2px solid transparent;white-space:nowrap;display:flex;align-items:center;gap:7px}
+.tab .c{font-size:11.5px;color:var(--ink-3);font-variant-numeric:tabular-nums}
+.tab[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--tab-c,var(--ink));font-weight:500}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--c,var(--ink-3));display:inline-block;flex:none}
+.c-primavera{--c:var(--s-primavera)} .c-verao{--c:var(--s-verao)} .c-outono{--c:var(--s-outono)} .c-inverno{--c:var(--s-inverno)}
+.listinfo{display:flex;justify-content:space-between;align-items:center;gap:8px;padding-block:10px;color:var(--ink-2);font-size:12.5px}
+
+/* compositor */
+#composer{background:var(--sheet);border:1px solid var(--rule);border-radius:14px;padding:18px;margin-block:16px;display:grid;gap:12px}
+#composer h2{margin:0;font-size:13px;font-weight:500;color:var(--ink-2);letter-spacing:.06em;text-transform:uppercase}
+#f-text{width:100%;box-sizing:border-box;border:0;border-bottom:1px solid var(--rule);background:transparent;font-family:var(--f-poem);font-size:21px;line-height:1.7;resize:vertical;min-height:120px;padding:4px 0}
+#f-text:focus{outline:none;border-bottom-color:var(--accent)}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.field{display:grid;gap:4px;font-size:12px;color:var(--ink-2)}
+.field input,.field textarea{border:1px solid var(--rule);background:var(--paper);border-radius:8px;padding:7px 9px;font-size:14px;box-sizing:border-box;width:100%}
+.field textarea{resize:vertical;min-height:60px}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{border:1px solid var(--rule);background:var(--paper);border-radius:999px;padding:5px 11px;font-size:13px;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+.chip[aria-pressed="true"]{border-color:var(--c);background:color-mix(in srgb,var(--c) 14%,var(--sheet));color:var(--ink)}
+.auto-tag{font-size:11px;color:var(--ink-3)}
+details.more summary{cursor:pointer;color:var(--ink-2);font-size:13px}
+details.more[open] summary{margin-bottom:10px}
+.more-grid{display:grid;gap:10px;grid-template-columns:1fr 1fr}
+.more-grid .wide{grid-column:1/-1}
+@media (max-width:520px){.more-grid{grid-template-columns:1fr}}
+.composer-foot{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.hint{font-size:12px;color:var(--ink-3)}
+.syl{font-size:12px;color:var(--ink-3);font-variant-numeric:tabular-nums}
+
+/* destaques */
+.feature{border:1px solid var(--rule);background:var(--sheet);border-radius:14px;padding:16px 18px;margin-block:14px}
+.feature .lbl{font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);display:flex;justify-content:space-between;align-items:center;gap:8px}
+.feature .hk{border:0;padding-block:10px 2px}
+.feature .hk + .hk{border-top:1px dashed var(--rule)}
+
+/* lista */
+.band{display:flex;align-items:center;gap:10px;margin-top:34px;margin-bottom:4px;font-family:var(--f-poem);font-size:19px;font-weight:600;color:var(--c,var(--ink))}
+.band::after{content:"";flex:1;height:1px;background:color-mix(in srgb,var(--c,var(--ink-3)) 35%,transparent)}
+.band small{font-family:var(--f-ui);font-size:12px;font-weight:400;color:var(--ink-3)}
+.month{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-2);margin-top:22px;margin-bottom:2px}
+.hk{padding-block:16px;border-bottom:1px solid var(--rule);display:grid;gap:6px}
+.hk:last-child{border-bottom:0}
+.meta{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--ink-3);font-variant-numeric:tabular-nums;min-height:26px}
+.meta .num{color:var(--ink-2);font-weight:500;min-width:2.4em}
+.meta .acts{margin-left:auto;display:flex;gap:2px;opacity:.0;transition:opacity .15s}
+.hk:hover .acts,.hk:focus-within .acts{opacity:1}
+@media (hover:none){.meta .acts{opacity:1}}
+.note{font-size:13.5px;color:var(--ink-2);font-style:italic;margin:0;max-width:62ch}
+.jp{font-family:var(--f-poem);font-size:19px;margin:0;letter-spacing:.06em;white-space:pre-line}
+.ro{font-size:13px;color:var(--ink-3);margin:0;white-space:pre-line}
+.poem{font-family:var(--f-poem);font-size:19px;line-height:1.75;margin:0;white-space:pre-line;overflow-wrap:anywhere}
+.place{font-size:12px;color:var(--ink-3);margin:0}
+mark{background:color-mix(in srgb,var(--accent) 22%,transparent);color:inherit;border-radius:3px;padding:0 1px}
+.confirm{display:flex;gap:6px;align-items:center;font-size:12px;color:var(--danger)}
+.btn.danger{color:var(--danger)}
+.empty{text-align:center;color:var(--ink-2);padding:48px 0;font-family:var(--f-poem);font-size:18px}
+.status{font-size:12.5px;color:var(--ink-2);background:var(--accent-soft);border-radius:10px;padding:9px 12px;margin-top:12px}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--paper);padding:9px 16px;border-radius:999px;font-size:13px;z-index:20}
+.kg{font-size:11.5px;color:var(--ink-3);border:1px dashed var(--rule);border-radius:999px;padding:1px 8px}
+.tab-sep{width:1px;background:var(--rule);margin:8px 6px;flex:none}
+.tab-jp{font-family:var(--f-poem);color:var(--accent)}
+/* escansão */
+#syl{display:grid;gap:3px;min-width:0}
+.scan-head{font-size:12px;color:var(--ink-2)}
+.scan-row{display:flex;gap:10px;align-items:baseline;font-size:13px;min-width:0}
+.scan-n{font-variant-numeric:tabular-nums;font-weight:700;color:var(--accent);min-width:1.4em;text-align:right}
+.scan-s{color:var(--ink-2);overflow-wrap:anywhere}
+.scan-s i{font-style:normal;color:var(--ink-3);margin:0 2px}
+.scan-s .ton{color:var(--ink);font-weight:700;text-decoration:underline;text-underline-offset:3px}
+.scan-s .post{color:var(--ink-3);opacity:.6}
+.kigo-found{display:flex;flex-wrap:wrap;gap:10px;font-size:12.5px;color:var(--ink-2);margin-top:4px}
+.kigo-found>span{display:inline-flex;align-items:center;gap:4px;color:var(--ink)}
+/* saijiki */
+.kigo-head{display:grid;gap:10px;margin-top:6px}
+.kigo-intro{margin:0;font-size:13.5px;color:var(--ink-2);max-width:65ch}
+.kigo-intro span{font-family:var(--f-poem);color:var(--accent)}
+.mine{font-size:13px;color:var(--ink-2);display:flex;gap:6px;align-items:center}
+.kigo-list{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.kigo{border:1px solid var(--rule);background:var(--sheet);border-radius:8px;padding:5px 10px;font-family:var(--f-poem);font-size:15px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;text-align:left}
+.kigo:hover{border-color:var(--c)}
+.kobs{font-family:var(--f-ui);font-size:11.5px;color:var(--ink-3)}
+.kn{font-family:var(--f-ui);font-size:11px;font-weight:700;color:var(--sheet);background:var(--c);border-radius:999px;padding:0 6px;font-variant-numeric:tabular-nums}
+/* nuvem / ajustes */
+#cloud{background:var(--sheet);border:1px solid var(--rule);border-radius:14px;padding:16px;margin-top:14px;display:grid;gap:12px}
+#cloud h2{margin:0;font-family:var(--f-poem);font-size:20px;font-weight:600}
+#cloud p{margin:0;font-size:13.5px;color:var(--ink-2)}
+#cloud .row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+#cloud input[type=email],#cloud input[type=password]{flex:1 1 200px;min-width:0;border:1px solid var(--rule);background:var(--paper);border-radius:10px;padding:10px 12px;font-size:16px}
+#cloud .sec{border-top:1px solid var(--rule);padding-top:12px;display:grid;gap:8px}
+#cloud .sec h3{margin:0;font-size:13px;font-weight:700;color:var(--ink-2);letter-spacing:.02em}
+.sync-pill{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--ink-2);background:none;border:0;padding:2px 0;cursor:pointer}
+.sync-pill .sd{width:8px;height:8px;border-radius:50%;background:var(--ink-3)}
+.sync-pill.ok .sd{background:#4f8a5b}.sync-pill.wait .sd{background:var(--s-verao)}.sync-pill.err .sd{background:var(--danger)}
+.sync-pill.busy .sd{animation:pulse 1s infinite alternate}
+@keyframes pulse{to{opacity:.3}}
+footer{padding-block:40px 60px;color:var(--ink-3);font-size:12px;text-align:center}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <div>
+        <h1>Haicais<span class="kanji" lang="ja">俳句帳</span></h1>
+        <p class="sub" id="sub">Carregando o caderno…</p>
+        <button class="sync-pill" id="sync-pill" type="button"><span class="sd"></span><span id="sync-txt">Só neste aparelho</span></button>
+      </div>
+      <div class="top-actions">
+        <button class="btn" id="btn-random" type="button">Ao acaso</button>
+        <button class="btn" id="btn-cloud" type="button" aria-label="Nuvem e backup">☁︎</button>
+        <button class="btn primary" id="btn-write" type="button">+ Escrever</button>
+      </div>
+    </div>
+    <div class="status" id="status" hidden></div>
+    <section id="cloud" hidden aria-label="Nuvem e backup">
+      <h2>Nuvem e backup</h2>
+      <p id="cloud-state"></p>
+      <div id="cloud-login" class="row" hidden>
+        <input type="email" id="c-email" placeholder="seu e-mail" autocomplete="username" inputmode="email">
+        <input type="password" id="c-pass" placeholder="senha" autocomplete="current-password">
+        <button class="btn primary" id="c-login" type="button">Entrar</button>
+        <button class="btn ghost" id="c-signup" type="button">Criar conta</button>
+      </div>
+      <div id="cloud-in" class="row" hidden>
+        <button class="btn primary" id="c-sync" type="button">Sincronizar agora</button>
+        <button class="btn ghost" id="c-logout" type="button">Sair</button>
+      </div>
+      <div class="sec">
+        <h3>Cópias</h3>
+        <div class="row">
+          <button class="btn" id="btn-export" type="button">Baixar em texto (.txt)</button>
+          <button class="btn" id="btn-backup" type="button">Baixar backup completo (.json)</button>
+          <label class="btn" for="f-import" style="cursor:pointer">Importar backup…</label>
+          <input type="file" id="f-import" accept=".json,application/json" hidden>
+        </div>
+      </div>
+      <div class="row"><button class="btn ghost" id="c-close" type="button">Fechar</button></div>
+    </section>
+  </header>
+
+  <section id="composer" hidden aria-label="Escrever haicai">
+    <h2 id="composer-title">Novo haicai</h2>
+    <textarea id="f-text" rows="3" placeholder="primeira linha&#10;segunda linha&#10;terceira linha" aria-label="Texto do haicai"></textarea>
+    <div class="row">
+      <label class="field">Data<input type="date" id="f-date"></label>
+      <label class="field" style="width:90px">Número<input type="number" id="f-num" min="1" inputmode="numeric"></label>
+      <div class="field">Estação <span class="auto-tag" id="season-auto"></span>
+        <div class="chips" id="f-season" role="group" aria-label="Estação"></div>
+      </div>
+    </div>
+    <details class="more" id="f-more">
+      <summary>Contexto, original em japonês e lugar</summary>
+      <div class="more-grid">
+        <label class="field wide">Contexto (texto que vem antes do haicai)<textarea id="f-note" rows="2"></textarea></label>
+        <label class="field">Original em japonês<input id="f-jp" lang="ja"></label>
+        <label class="field">Romaji<input id="f-ro" placeholder="furu ike ya / kawazu tobikomu / mizu no oto"></label>
+        <label class="field wide">Lugar<input id="f-place" placeholder="ex.: Florianópolis/SC"></label>
+      </div>
+    </details>
+    <div class="syl" id="syl" aria-live="polite"></div>
+    <div class="composer-foot">
+      <span></span>
+      <div class="row">
+        <span class="hint">⌘ + Enter salva</span>
+        <button class="btn" id="btn-cancel" type="button">Cancelar</button>
+        <button class="btn primary" id="btn-save" type="button">Guardar</button>
+      </div>
+    </div>
+  </section>
+
+  <div id="featured"></div>
+</div>
+
+<div class="bar">
+  <div class="wrap">
+    <label class="search">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input id="q" type="search" placeholder="Buscar palavras, datas, kigo, número…" autocomplete="off" aria-label="Buscar">
+      <button class="btn ghost clear" id="q-clear" type="button" hidden aria-label="Limpar busca">✕</button>
+    </label>
+    <div class="tabs" role="tablist" id="tabs"></div>
+  </div>
+</div>
+
+<main class="wrap">
+  <div class="listinfo">
+    <span id="count"></span>
+    <button class="btn ghost" id="btn-order" type="button"></button>
+  </div>
+  <div id="list"><p class="empty">Abrindo o caderno…</p></div>
+  <footer>Caderno de Haicais · 俳句帳</footer>
+</main>
+<div class="toast" id="toast" hidden></div>
+
+<script src="config.js"></script>
+<script src="store.js"></script>
+<script>
+(function(){
+const SEASONS=[["primavera","Primavera"],["verao","Verão"],["outono","Outono"],["inverno","Inverno"]];
+const SLABEL=Object.fromEntries(SEASONS);
+const MONTHS=["janeiro","fevereiro","março","abril","maio","junho","julho","agosto","setembro","outubro","novembro","dezembro"];
+const MSHORT=["jan","fev","mar","abr","mai","jun","jul","ago","set","out","nov","dez"];
+const $=s=>document.querySelector(s);
+const store={get(k,d){try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+
+const C=window.Caderno;       // armazenamento local + nuvem (store.js)
+let canWrite=true;
+let st={tab:store.get("hk.tab","todos"),q:"",order:store.get("hk.order","desc"),ks:"todas",kc:"todas",kmine:false};
+let editingId=null, seasonManual=false, confirmId=null, featured=null;
+
+/* estações do hemisfério sul */
+function seasonOf(iso){
+  if(!iso) return null;
+  const [y,m,d]=iso.split("-").map(Number);
+  if((m===3&&d>=20)||m===4||m===5||(m===6&&d<21)) return "outono";
+  if((m===6&&d>=21)||m===7||m===8||(m===9&&d<22)) return "inverno";
+  if((m===9&&d>=22)||m===10||m===11||(m===12&&d<21)) return "primavera";
+  return "verao";
+}
+function seasonKey(h,tab){
+  if(!h.season) return "none";
+  if(!h.date&&h.sk) return tab&&tab!=="todos"?h.season+"-kg":"none";
+  if(!h.date) return h.season+"-sd";
+  const [y,m]=h.date.split("-").map(Number);
+  if(h.season==="verao"){const a=m>=9?y:y-1;return "verao-"+a}
+  if(h.season==="inverno"&&m<=2) return "inverno-"+(y-1);
+  if(h.season==="primavera"&&m<=2) return "primavera-"+(y-1);
+  return h.season+"-"+y;
+}
+function seasonTitle(k){
+  if(k==="none") return ["Primeiros haicais","sem data"];
+  const [s,y]=k.split("-");
+  if(y==="sd") return [SLABEL[s],"sem data"];
+  if(y==="kg") return [SLABEL[s],"primeiros haicais · estação pelo kigo"];
+  if(s==="verao") return ["Verão "+y+"/"+(+y+1),""];
+  return [SLABEL[s]+" de "+y,""];
+}
+function fmtDate(iso){if(!iso)return"sem data";const[y,m,d]=iso.split("-");return (+d)+" "+MSHORT[m-1]+" "+y}
+function monthTitle(iso){const[y,m]=iso.split("-");return MONTHS[m-1][0].toUpperCase()+MONTHS[m-1].slice(1)+" de "+y}
+function todayISO(){const t=new Date();return t.getFullYear()+"-"+String(t.getMonth()+1).padStart(2,"0")+"-"+String(t.getDate()).padStart(2,"0")}
+
+/* busca sem acento */
+const fold=c=>c.normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase().charAt(0)||c;
+function foldStr(s){let o="";for(const ch of s){const f=ch.normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase();o+=f.length===ch.length?f:ch.toLowerCase().padEnd(ch.length," ").slice(0,ch.length)}return o}
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+function hl(text,terms){
+  text=String(text??""); if(!terms.length||!text) return esc(text);
+  const f=foldStr(text); const marks=new Array(text.length).fill(false);
+  for(const t of terms){let i=f.indexOf(t);while(i>-1&&t){for(let j=i;j<i+t.length;j++)marks[j]=true;i=f.indexOf(t,i+t.length)}}
+  let o="",open=false;
+  for(let i=0;i<text.length;i++){if(marks[i]&&!open){o+="<mark>";open=true}if(!marks[i]&&open){o+="</mark>";open=false}o+=esc(text[i])}
+  return o+(open?"</mark>":"");
+}
+function hay(h){
+  let extra="";
+  if(h.date){const[y,m,d]=h.date.split("-");extra=[MONTHS[m-1],y,d+"/"+m+"/"+y,(+d)+"/"+(+m)+"/"+y].join(" ")}
+  return foldStr([h.text,h.jp,h.romaji,h.note,h.place,h.kigo,extra,h.season?SLABEL[h.season]:""].join(" \n "));
+}
+
+function all(){
+  return C.haikus().map(h=>Object.assign(h,{ord:h.ord!=null?h.ord:(h.createdAt||0)})).sort((a,b)=>a.ord-b.ord);
+}
+
+/* ---------- render ---------- */
+function renderTabs(items){
+  const counts={todos:items.length};SEASONS.forEach(([k])=>counts[k]=items.filter(h=>h.season===k).length);
+  $("#tabs").innerHTML=[["todos","Todos"],...SEASONS].map(([k,l])=>
+    `<button class="tab ${k!=="todos"?"c-"+k:""}" role="tab" data-tab="${k}" aria-selected="${st.tab===k}" style="${k!=="todos"?"--tab-c:var(--s-"+k+")":""}">${k!=="todos"?'<span class="dot"></span>':""}${l}<span class="c">${counts[k]}</span></button>`).join("")
+    +`<span class="tab-sep" aria-hidden="true"></span><button class="tab" role="tab" data-tab="kigos" aria-selected="${st.tab==="kigos"}" style="--tab-c:var(--accent)"><span lang="ja" class="tab-jp">季</span>Kigos<span class="c">${kigos.length||""}</span></button>`;
+}
+
+/* ---------- dicionário de kigos ---------- */
+const KCAT={T:"Tempo",FA:"Fenômeno atmosférico",GEO:"Geografia",FAU:"Fauna",FL:"Flora",V:"Vivenciais"};
+const KSEA={P:"primavera",V:"verao",O:"outono",I:"inverno"};
+let kigos=[], kigoCache=null, kigoCacheKey="";
+function kSeason(c){return KSEA[c[0]]}
+function kCat(c){return c.slice(1)}
+function kigoRx(t){const f=foldStr(t).replace(/[.*+?^${}()|[\]\\]/g,"\\$&");return new RegExp("(^|[^a-z])"+f+"(s|es)?(?![a-z])")}
+function kigoCounts(items){
+  const key=items.length+":"+C.version();
+  if(kigoCache&&kigoCacheKey===key) return kigoCache;
+  const hs=items.map(hay); const m=new Map();
+  kigos.forEach(k=>{const rx=k.rx||(k.rx=kigoRx(k.t));let c=0;for(const s of hs) if(rx.test(s)) c++; if(c) m.set(k.t,c)});
+  kigoCache=m;kigoCacheKey=key;return m;
+}
+function renderKigos(items){
+  const q=foldStr(st.q.trim());
+  const counts=kigoCounts(items);
+  let list=kigos.filter(k=>(st.ks==="todas"||kSeason(k.c)===st.ks)&&(st.kc==="todas"||kCat(k.c)===st.kc));
+  if(q) list=list.filter(k=>foldStr(k.t+" "+(k.obs||"")).includes(q));
+  if(st.kmine) list=list.filter(k=>counts.has(k.t));
+  const chip=(grp,v,l,cls="")=>`<button type="button" class="chip ${cls}" data-act="kf" data-g="${grp}" data-v="${v}" aria-pressed="${st[grp]===v}">${cls?'<span class="dot"></span>':""}${l}</button>`;
+  let html=`<div class="kigo-head">
+    <p class="kigo-intro"><span lang="ja">歳時記</span> · Saijiki brasileiro com os ${kigos.length} termos de estação de <em>Natureza – Berço do Haicai</em>, de H. Masuda Goga e Teruko Oda, na lista organizada por Carlos Martins (O Zen do Haicai, 2018). Toque num kigo para ver os seus haicais com ele.</p>
+    <div class="chips">${chip("ks","todas","Todas")}${SEASONS.map(([k,l])=>chip("ks",k,l,"c-"+k)).join("")}</div>
+    <div class="chips">${chip("kc","todas","Todos os temas")}${Object.entries(KCAT).map(([k,l])=>chip("kc",k,l)).join("")}</div>
+    <label class="mine"><input type="checkbox" id="k-mine" ${st.kmine?"checked":""}> Só os que aparecem nos meus haicais</label>
+  </div>`;
+  $("#count").textContent=list.length+" kigo"+(list.length===1?"":"s")+(q?" encontrados":"");
+  if(!list.length){$("#list").innerHTML=html+`<p class="empty">Nenhum kigo${q?" com “"+esc(st.q.trim())+"”":""} nesta seleção.</p>`;return}
+  let lastS=null,lastC=null,open=false;
+  for(const k of list){
+    const s=kSeason(k.c),c=kCat(k.c);
+    if(s!==lastS){if(open)html+="</div>";open=false;html+=`<h3 class="band c-${s}">${SLABEL[s]}<small>${{primavera:"setembro · outubro · novembro",verao:"dezembro · janeiro · fevereiro",outono:"março · abril · maio",inverno:"junho · julho · agosto"}[s]}</small></h3>`;lastS=s;lastC=null}
+    if(c!==lastC){if(open)html+="</div>";html+=`<div class="month">${KCAT[c]}</div><div class="kigo-list">`;open=true;lastC=c}
+    const n=counts.get(k.t);
+    html+=`<button type="button" class="kigo c-${s}" data-act="kigo" data-term="${esc(k.t)}"${k.obs?` title="${esc(k.obs)}"`:""}>${hl(k.t,q?[q]:[])}${k.obs?` <span class="kobs">(${esc(k.obs)})</span>`:""}${n?`<span class="kn">${n}</span>`:""}</button>`;
+  }
+  if(open)html+="</div>";
+  $("#list").innerHTML=html;
+}
+function findKigos(text){
+  const f=" "+foldStr(text)+" ";const found=[];
+  kigos.forEach(k=>{const rx=k.rx||(k.rx=kigoRx(k.t));if(rx.test(f))found.push(k)});
+  found.sort((a,b)=>b.t.length-a.t.length);
+  return found.filter((k,i)=>!found.slice(0,i).some(o=>foldStr(o.t).includes(foldStr(k.t)))).slice(0,4);
+}
+function card(h,terms,opts={}){
+  const acts=canWrite&&!opts.noActs?(confirmId===h.id
+    ?`<span class="acts" style="opacity:1"><span class="confirm">Apagar este haicai?<button class="btn ghost danger" data-act="del-yes" data-id="${h.id}">Apagar</button><button class="btn ghost" data-act="del-no">Manter</button></span></span>`
+    :`<span class="acts"><button class="btn ghost" data-act="edit" data-id="${h.id}">Editar</button><button class="btn ghost" data-act="del" data-id="${h.id}">Apagar</button></span>`):"";
+  return `<article class="hk" data-id="${h.id}">
+    <div class="meta"><span class="num">${h.n!=null?esc(h.n):"—"}</span>${h.season?`<span class="dot c-${h.season}" title="${SLABEL[h.season]}"></span>`:""}<time>${fmtDate(h.date)}</time>${h.sk&&h.kigo?`<span class="kg" title="Estação deduzida pelo kigo">kigo: ${hl(h.kigo,terms)}</span>`:""}${acts}</div>
+    ${h.note?`<p class="note">${hl(h.note,terms)}</p>`:""}
+    ${h.jp?`<p class="jp" lang="ja">${hl(h.jp,terms)}</p>`:""}
+    ${h.romaji?`<p class="ro">${hl(h.romaji,terms)}</p>`:""}
+    ${h.text?`<p class="poem">${hl(h.text,terms)}</p>`:""}
+    ${h.place?`<p class="place">${hl(h.place,terms)}</p>`:""}
+  </article>`;
+}
+function render(){
+  const items=all();
+  renderTabs(items);
+  const years=items.filter(h=>h.date).map(h=>+h.date.slice(0,4));
+  $("#sub").textContent=items.length+" haicais"+(years.length?" · "+Math.min(...years)+"–"+Math.max(...years):"");
+  $("#btn-order").hidden=st.tab==="kigos";
+  $("#q").placeholder=st.tab==="kigos"?"Buscar kigo: lua, ipê, cigarra, geada…":"Buscar palavras, datas, kigo, número…";
+  if(st.tab==="kigos"){renderKigos(items);return}
+  const q=st.q.trim(); const numQ=/^#?\d+$/.test(q)?+q.replace("#",""):null;
+  const terms=numQ!=null?[]:foldStr(q).split(/\s+/).filter(Boolean);
+  let list=items.filter(h=>st.tab==="todos"||h.season===st.tab);
+  if(numQ!=null) list=list.filter(h=>h.n===numQ);
+  else if(terms.length) list=list.filter(h=>{const s=hay(h);return terms.every(t=>s.includes(t))});
+  if(st.order==="desc") list=list.slice().reverse();
+  $("#count").textContent=(q?list.length+" encontrado"+(list.length===1?"":"s"):list.length+" haicai"+(list.length===1?"":"s"))+(st.tab!=="todos"?" · "+SLABEL[st.tab]:"");
+  $("#btn-order").textContent=st.order==="desc"?"Mais recentes primeiro ↓":"Mais antigos primeiro ↑";
+  if(!list.length){$("#list").innerHTML=`<p class="empty">${q?"Nenhum haicai com “"+esc(q)+"”.":"Nenhum haicai aqui ainda."}</p>`;return}
+  let html="",lastS=null,lastM=null;
+  for(const h of list){
+    const sk=seasonKey(h,st.tab);
+    if(sk!==lastS){const[t,sm]=seasonTitle(sk);html+=`<h3 class="band ${h.season?"c-"+h.season:""}">${t}${sm?` <small>${sm}</small>`:""}</h3>`;lastS=sk;lastM=null}
+    const mk=h.date?h.date.slice(0,7):null;
+    if(mk&&mk!==lastM){html+=`<div class="month">${monthTitle(h.date)}</div>`}
+    lastM=mk;
+    html+=card(h,terms);
+  }
+  $("#list").innerHTML=html;
+}
+function renderFeatured(){
+  const box=$("#featured"); const items=all();
+  if(featured){
+    const h=items.find(x=>x.id===featured);
+    if(h){box.innerHTML=`<div class="feature"><div class="lbl">Ao acaso<span><button class="btn ghost" data-act="rand">Outro</button><button class="btn ghost" data-act="close-feat" aria-label="Fechar">✕</button></span></div>${card(h,[],{noActs:true})}</div>`;return}
+  }
+  const t=todayISO().slice(5); const y=todayISO().slice(0,4);
+  const same=items.filter(h=>h.date&&h.date.slice(5)===t&&h.date.slice(0,4)!==y);
+  if(same.length&&!store.get("hk.hideday-"+todayISO(),false)){
+    box.innerHTML=`<div class="feature"><div class="lbl">Neste dia, em outros anos<button class="btn ghost" data-act="hide-day" aria-label="Fechar">✕</button></div>${same.slice(-3).map(h=>card(h,[],{noActs:true})).join("")}</div>`;
+  } else box.innerHTML="";
+}
+
+/* ---------- compositor ---------- */
+function renderSeasonChips(sel){
+  $("#f-season").innerHTML=SEASONS.map(([k,l])=>`<button type="button" class="chip c-${k}" data-season="${k}" aria-pressed="${sel===k}"><span class="dot"></span>${l}</button>`).join("");
+  $("#season-auto").textContent=seasonManual?"":"(automática pela data)";
+}
+function currentSeason(){const b=$("#f-season [aria-pressed=true]");return b?b.dataset.season:null}
+function openComposer(h){
+  editingId=h?h.id:null; const items=all();
+  $("#composer-title").textContent=h?"Editar haicai "+(h.n??""):"Novo haicai";
+  $("#f-text").value=h?h.text||"":store.get("hk.draft","");
+  $("#f-date").value=h?h.date||"":todayISO();
+  $("#f-num").value=h?(h.n??""):(Math.max(0,...items.map(x=>+x.n||0))+1);
+  $("#f-note").value=h?.note||""; $("#f-jp").value=h?.jp||""; $("#f-ro").value=h?.romaji||""; $("#f-place").value=h?.place||"";
+  $("#f-more").open=!!(h&&(h.note||h.jp||h.romaji||h.place));
+  seasonManual=!!(h&&h.season&&h.season!==seasonOf(h.date));
+  renderSeasonChips(h?h.season:seasonOf(todayISO()));
+  $("#composer").hidden=false; updateSyl();
+  $("#composer").scrollIntoView({behavior:"smooth",block:"start"});
+  setTimeout(()=>$("#f-text").focus({preventScroll:true}),250);
+}
+function closeComposer(){$("#composer").hidden=true;editingId=null}
+/* escansão: sílabas poéticas, com sinalefa, contando até a última tônica do verso */
+const SC_V="aeiouáéíóúâêôãõàü";
+const SC_ONSET=["bl","br","cl","cr","dl","dr","fl","fr","gl","gr","pl","pr","tl","tr","vl","vr","ch","lh","nh","qu","gu"];
+function scWord(w){
+  const ch=[...w],n=ch.length,isv=ch.map(c=>SC_V.includes(c));
+  for(let i=1;i<n-1;i++) if(ch[i]==="u"&&(ch[i-1]==="q"||ch[i-1]==="g")&&isv[i+1]) isv[i]=false;
+  const nuc=[];let i=0;
+  while(i<n){if(!isv[i]){i++;continue}let s=i,e=i;
+    while(e+1<n&&isv[e+1]&&e===s){const a=ch[e],b=ch[e+1],aw="iu".includes(a),bw="iu".includes(b);
+      let j=(!aw&&bw)||(aw&&bw&&a!==b)||("ãõ".includes(a)&&"oe".includes(b));
+      if(j&&bw&&e+2<n&&"mn".includes(ch[e+2])&&!(e+3<n&&isv[e+3])&&e+2!==n-1) j=false; // a-in-da
+      if(!j)break;e++}
+    nuc.push([s,e]);i=e+1}
+  if(!nuc.length) return {syl:[w],stress:0};
+  const cuts=[0];
+  for(let k=1;k<nuc.length;k++){const a=nuc[k-1][1]+1,b=nuc[k][0],c=b-a;
+    let cut=b; if(c===1) cut=b-1; else if(c>=2){const two=ch.slice(b-2,b).join("");cut=SC_ONSET.includes(two)?b-2:b-1}
+    cuts.push(cut)}
+  const syl=cuts.map((c,k)=>ch.slice(c,k+1<cuts.length?cuts[k+1]:n).join(""));
+  let st=-1;
+  const find=re=>{for(let k=0;k<nuc.length;k++){const seg=ch.slice(nuc[k][0],nuc[k][1]+1).join("");if(re.test(seg))return k}return -1};
+  st=find(/[áéíóúâêô]/); if(st<0) st=find(/[ãõ]/);
+  if(st<0){st=nuc.length===1?0:(/(a|e|o|as|es|os|am|em|ens)$/.test(w)?nuc.length-2:nuc.length-1)}
+  return {syl,stress:st};
+}
+function scanLine(line){
+  const words=line.toLowerCase().replace(/[^a-záéíóúâêôãõàüç\s-]/g," ").split(/[\s-]+/).filter(w=>/[aeiouáéíóúâêôãõàü]/.test(w));
+  if(!words.length) return null;
+  const units=[];let lastStress=0;
+  words.forEach((w,wi)=>{const r=scWord(w);let start=units.length;
+    r.syl.forEach((s,k)=>{
+      if(k===0&&units.length){const prev=units[units.length-1];
+        if(/[aeiouáéíóúâêô]h?$/.test(prev.t)&&!/(ão|ãe|õe)$/.test(prev.t)&&/^h?[aeiouáéíóúâêôãõ]/.test(s)){prev.t+="‿"+s;prev.w=wi;start=units.length-1;return}}
+      units.push({t:s,w:wi,k})});
+    if(wi===words.length-1) lastStress=start+r.stress;
+  });
+  return {count:lastStress+1,units,stress:lastStress};
+}
+function updateSyl(){
+  const lines=$("#f-text").value.split("\n").filter(l=>l.trim());
+  const rows=lines.map(l=>{const r=/[\u3040-\u30ff\u4e00-\u9fff]/.test(l)?null:scanLine(l);
+    if(!r) return "";
+    return `<div class="scan-row"><span class="scan-n">${r.count}</span><span class="scan-s">${r.units.map((u,i)=>`<span class="${i>r.stress?"post":i===r.stress?"ton":""}">${esc(u.t)}</span>`).join('<i>/</i>')}</span></div>`}).filter(Boolean);
+  const kg=kigos.length?findKigos($("#f-text").value):[];
+  $("#syl").innerHTML=(rows.length?`<div class="scan-head">Escansão <span class="hint">sílabas poéticas até a última tônica · ‿ junção de vogais</span></div>${rows.join("")}`:"")
+    +(kg.length?`<div class="kigo-found">Kigo: ${kg.map(k=>`<span class="c-${kSeason(k.c)}"><span class="dot"></span> ${esc(k.t)} · ${SLABEL[kSeason(k.c)]}</span>`).join("")}</div>`:"");
+}
+async function save(){
+  const text=$("#f-text").value.replace(/\s+$/,"").replace(/^\s+/,"");
+  if(!text&&!$("#f-jp").value.trim()){toast("Escreva o haicai antes de guardar.");return}
+  const date=$("#f-date").value||null;
+  const prev=editingId?all().find(x=>x.id===editingId):null;
+  const id=editingId||("n"+Date.now().toString(36));
+  const doc={n:$("#f-num").value?+$("#f-num").value:null,date,season:currentSeason()||seasonOf(date),text,
+    jp:$("#f-jp").value.trim(),romaji:$("#f-ro").value.trim(),note:$("#f-note").value.trim(),place:$("#f-place").value.trim(),
+    vol:prev?.vol??3,createdAt:prev?.createdAt??(prev?0:Date.now()),ord:prev?.ord??Date.now(),kigo:prev?.kigo,sk:prev?.sk};
+  if(prev&&prev.date!==date){delete doc.sk;delete doc.kigo}
+  $("#btn-save").disabled=true;
+  try{
+    Object.keys(doc).forEach(k=>doc[k]===undefined&&delete doc[k]);
+    await C.saveHaiku(id,doc);
+    if(!editingId) store.set("hk.draft","");
+    closeComposer(); render(); renderFeatured();
+    toast(editingId?"Haicai atualizado.":"Haicai guardado.");
+    if(!prev){st.q="";$("#q").value="";}
+  }catch(e){toast("Não foi possível guardar neste aparelho. Tente de novo.")}
+  finally{$("#btn-save").disabled=false}
+}
+async function del(id){
+  try{await C.deleteHaiku(id);confirmId=null;render();renderFeatured();toast("Haicai apagado.")}
+  catch(e){toast("Não foi possível apagar. Tente de novo.")}
+}
+
+/* ---------- exportar ---------- */
+function exportText(){
+  const items=all(); let out="Haicais\n\n",lastS=null,lastM=null,lastD=null;
+  for(const h of items){
+    const sk=seasonKey(h);
+    if(sk!==lastS&&h.season){out+="\n"+seasonTitle(sk)[0].toUpperCase()+"\n";lastS=sk}
+    if(h.date){const mk=h.date.slice(0,7);if(mk!==lastM){out+="\n"+monthTitle(h.date).toUpperCase()+"\n";lastM=mk}
+      if(h.date!==lastD){const[y,m,d]=h.date.split("-");out+=d+"/"+m+"/"+y+"\n";lastD=h.date}}
+    out+=(h.n!=null?h.n+".\n":"")+(h.note?h.note+"\n":"")+(h.jp?h.jp+"\n":"")+(h.romaji?h.romaji+"\n":"")+(h.text?h.text+"\n":"")+(h.place?h.place+"\n":"");
+  }
+  return out;
+}
+
+/* ---------- eventos ---------- */
+let toastT;function toast(m){const t=$("#toast");t.textContent=m;t.hidden=false;clearTimeout(toastT);toastT=setTimeout(()=>t.hidden=true,2600)}
+$("#tabs").addEventListener("click",e=>{const b=e.target.closest("[data-tab]");if(!b)return;st.tab=b.dataset.tab;store.set("hk.tab",st.tab);render();window.scrollTo({top:$(".bar").offsetTop-2,behavior:"smooth"})});
+let qT;$("#q").addEventListener("input",e=>{st.q=e.target.value;$("#q-clear").hidden=!st.q;clearTimeout(qT);qT=setTimeout(render,120)});
+$("#q-clear").addEventListener("click",()=>{st.q="";$("#q").value="";$("#q-clear").hidden=true;render();$("#q").focus()});
+$("#btn-order").addEventListener("click",()=>{st.order=st.order==="desc"?"asc":"desc";store.set("hk.order",st.order);render()});
+$("#btn-write").addEventListener("click",()=>{if(!canWrite){toast("Este caderno está só para leitura agora.");return}openComposer(null)});
+$("#btn-cancel").addEventListener("click",closeComposer);
+$("#btn-save").addEventListener("click",save);
+$("#f-text").addEventListener("input",()=>{updateSyl();if(!editingId)store.set("hk.draft",$("#f-text").value)});
+$("#composer").addEventListener("keydown",e=>{if(e.key==="Enter"&&(e.metaKey||e.ctrlKey)){e.preventDefault();save()}if(e.key==="Escape")closeComposer()});
+$("#f-date").addEventListener("change",()=>{if(!seasonManual)renderSeasonChips(seasonOf($("#f-date").value))});
+$("#f-season").addEventListener("click",e=>{const b=e.target.closest("[data-season]");if(!b)return;seasonManual=true;renderSeasonChips(b.dataset.season)});
+function randomPick(){const items=all().filter(h=>h.text||h.jp);featured=items[Math.floor(Math.random()*items.length)]?.id;renderFeatured();$("#featured").scrollIntoView({behavior:"smooth",block:"nearest"})}
+$("#btn-random").addEventListener("click",randomPick);
+document.addEventListener("click",e=>{
+  const b=e.target.closest("[data-act]");if(!b)return;const a=b.dataset.act,id=b.dataset.id;
+  if(a==="edit"){openComposer(all().find(x=>x.id===id))}
+  else if(a==="del"){confirmId=id;render()}
+  else if(a==="del-no"){confirmId=null;render()}
+  else if(a==="del-yes"){del(id)}
+  else if(a==="rand"){randomPick()}
+  else if(a==="close-feat"){featured=null;renderFeatured()}
+  else if(a==="hide-day"){store.set("hk.hideday-"+todayISO(),true);renderFeatured()}
+  else if(a==="kf"){st[b.dataset.g]=b.dataset.v;render()}
+  else if(a==="kigo"){st.tab="todos";store.set("hk.tab","todos");st.q=b.dataset.term;$("#q").value=st.q;$("#q-clear").hidden=false;render();window.scrollTo({top:$(".bar").offsetTop-2,behavior:"smooth"})}
+});
+document.addEventListener("change",e=>{if(e.target.id==="k-mine"){st.kmine=e.target.checked;render()}});
+function saveFile(name,text,type){
+  const blob=new Blob([text],{type});
+  const file=typeof File==="function"?new File([blob],name,{type}):null;
+  if(file&&navigator.canShare&&navigator.canShare({files:[file]})&&/iPhone|iPad|iPod/.test(navigator.userAgent)){
+    navigator.share({files:[file]}).catch(()=>{});return;
+  }
+  const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();
+  setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1500);
+}
+$("#btn-export").addEventListener("click",()=>saveFile("Haicais "+todayISO()+".txt",exportText(),"text/plain"));
+$("#btn-backup").addEventListener("click",()=>saveFile("Haicais backup "+todayISO()+".json",JSON.stringify(C.exportPack()),"application/json"));
+$("#f-import").addEventListener("change",async e=>{
+  const f=e.target.files[0];e.target.value="";if(!f)return;
+  try{const r=await C.importPack(JSON.parse(await f.text()));toast(r.added+" haicais importados"+(r.kept?" · "+r.kept+" já estavam aqui":"")+".")}
+  catch(err){toast("Este arquivo não é um backup do caderno.")}
+});
+
+/* ---------- carregar ---------- */
+function setStatus(m){const s=$("#status");s.textContent=m||"";s.hidden=!m}
+/* ---------- nuvem ---------- */
+function fmtTime(t){const d=new Date(t);const same=d.toDateString()===new Date().toDateString();return (same?"":d.getDate()+"/"+(d.getMonth()+1)+" ")+String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0")}
+function renderCloud(){
+  const s=C.status, pill=$("#sync-pill"); let cls="",txt="";
+  if(!C.cloudEnabled){txt="Só neste aparelho";}
+  else if(!s.email){cls="wait";txt="Sem backup na nuvem · toque para entrar";}
+  else if(s.syncing){cls="ok busy";txt="Sincronizando…";}
+  else if(s.error){cls="err";txt="Backup com problema";}
+  else if(s.pending){cls="wait";txt=s.pending+(s.pending>1?" mudanças esperando":" mudança esperando")+(s.online?"…":" internet");}
+  else {cls="ok";txt="Salvo na nuvem"+(s.lastSync?" · "+fmtTime(s.lastSync):"");}
+  pill.className="sync-pill "+cls;$("#sync-txt").textContent=txt;
+  let st="";
+  if(!C.cloudEnabled) st="O backup na nuvem ainda não foi configurado neste app. Seus haicais ficam guardados neste aparelho; use “Baixar backup” de vez em quando.";
+  else if(!s.email) st="Entre com seu e-mail e senha para guardar uma cópia de tudo na nuvem. Sem internet o caderno continua funcionando: o backup acontece quando a conexão voltar.";
+  else st="Conectado como "+s.email+". "+(s.error?s.error:s.pending?s.pending+" mudança(s) ainda não subiram"+(s.online?".":" — sem internet agora."):"Tudo salvo"+(s.lastSync?" (última vez: "+fmtTime(s.lastSync)+").":"."));
+  $("#cloud-state").textContent=st;
+  $("#cloud-login").hidden=!C.cloudEnabled||!!s.email;
+  $("#cloud-in").hidden=!C.cloudEnabled||!s.email;
+}
+function toggleCloud(show){const el=$("#cloud");el.hidden=show===undefined?!el.hidden:!show;if(!el.hidden){renderCloud();el.scrollIntoView({behavior:"smooth",block:"nearest"})}}
+$("#btn-cloud").addEventListener("click",()=>toggleCloud());
+$("#sync-pill").addEventListener("click",()=>toggleCloud(true));
+$("#c-close").addEventListener("click",()=>toggleCloud(false));
+async function doAuth(kind){
+  const email=$("#c-email").value.trim(),pass=$("#c-pass").value;
+  if(!email||!pass){toast("Preencha e-mail e senha.");return}
+  if(kind==="signup"&&pass.length<6){toast("A senha precisa ter pelo menos 6 caracteres.");return}
+  const b=kind==="login"?$("#c-login"):$("#c-signup");b.disabled=true;
+  try{
+    if(kind==="login"){await C.login(email,pass);toast("Conectado. Backup em andamento.")}
+    else{const r=await C.signup(email,pass);toast(r==="ok"?"Conta criada e conectada.":"Conta criada. Confirme pelo e-mail e depois toque em Entrar.")}
+    $("#c-pass").value="";
+  }catch(e){toast(/invalid/i.test(e.message)?"E-mail ou senha não conferem.":/already/i.test(e.message)?"Esse e-mail já tem conta: use Entrar.":/fetch|network|load failed/i.test(e.message)?"Sem internet agora.":"Não deu certo: "+e.message)}
+  finally{b.disabled=false}
+}
+$("#c-login").addEventListener("click",()=>doAuth("login"));
+$("#c-signup").addEventListener("click",()=>doAuth("signup"));
+$("#c-pass").addEventListener("keydown",e=>{if(e.key==="Enter")doAuth("login")});
+$("#c-sync").addEventListener("click",()=>C.syncNow());
+$("#c-logout").addEventListener("click",async()=>{await C.logout();toast("Você saiu. Os haicais continuam neste aparelho.")});
+
+/* ---------- carregar ---------- */
+function setStatus(m){const s=$("#status");s.textContent=m||"";s.hidden=!m}
+let lastVer="";
+C.onChange(what=>{
+  renderCloud();
+  if(what==="change"||what==="load"){kigos=C.kigos;kigoCache=null;render();renderFeatured();updateSyl()}
+  const empty=!C.haikus().length;
+  setStatus(empty?"Seu caderno neste aparelho ainda está vazio. "+(C.cloudEnabled&&!C.status.email?"Toque em ☁︎ e entre na sua conta para trazer seus haicais da nuvem.":C.status.email?"Trazendo seus haicais da nuvem…":"Toque em ☁︎ para importar um backup."):"");
+});
+C.ready.catch(()=>setStatus("Este navegador não deixou o caderno guardar dados. Abra pelo Safari e adicione à Tela de Início."));
+render();
+
+if("serviceWorker" in navigator&&location.protocol!=="file:"){
+  navigator.serviceWorker.register("sw.js").then(reg=>{
+    reg.addEventListener("updatefound",()=>{const w=reg.installing;w&&w.addEventListener("statechange",()=>{if(w.state==="installed"&&navigator.serviceWorker.controller)toast("Nova versão do app pronta: feche e abra de novo para usar.")})});
+  }).catch(()=>{});
+}
+})();
+</script>
+</body>
+</html>
