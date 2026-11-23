@@ -7,236 +7,298 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Haicais">
-<meta name="theme-color" content="#f2f3ef" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#131614" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f5f4f0" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#111110" media="(prefers-color-scheme: dark)">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" href="icon-192.png">
 <title>Haicais</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;600&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;500;600;700&family=Inter+Tight:wght@400;500;600;700;800&family=Zen+Kaku+Gothic+New:wght@400&display=swap">
 <style>
-/* Layout: uma coluna estreita como um caderno; barra fixa com busca e abas de estação; cada haicai respira em branco. */
+/* Visual v12: claro e neutro, título grosso sem serifa, poema em serifa; cartões arredondados; barra de ícones flutuante embaixo. */
 :root{
-  --paper:#f2f3ef; --sheet:#fbfbf8; --ink:#1d211f; --ink-2:#5b625e; --ink-3:#8b928d; --rule:#dfe2dc;
-  --accent:#2f4b78; --accent-soft:#e3e8f1;
-  --s-primavera:#b4507a; --s-verao:#b9741a; --s-outono:#a0482a; --s-inverno:#4a6b86;
-  --danger:#a33a2a;
+  --bg:#f5f4f0; --surface:#ffffff; --soft:#ebe9e3; --ink:#141414; --ink-2:#6e6c66; --ink-3:#a19e97; --line:#e6e3dc; --on-ink:#ffffff;
+  --s-primavera:#6c8a66; --b-primavera:#e4eadf;
+  --s-verao:#b0843f; --b-verao:#f1e8d6;
+  --s-outono:#a5694f; --b-outono:#efe1d8;
+  --s-inverno:#687e93; --b-inverno:#e0e6eb;
+  --accent:#4f6f96; --danger:#b0432f; --ok:#55734f; --ok-bg:#e3eadf; --gold:#c9932b;
+  --shadow:0 1px 2px rgba(20,20,20,.04),0 8px 24px rgba(20,20,20,.045);
+  --shadow-s:0 1px 2px rgba(20,20,20,.06);
+  --glass:rgba(255,255,255,.80); --glass-b:rgba(255,255,255,.95);
   --f-poem:"Shippori Mincho","Hiragino Mincho ProN","Yu Mincho",Georgia,serif;
-  --f-ui:"Zen Kaku Gothic New","Hiragino Sans","Helvetica Neue",Arial,sans-serif;
+  --f-ui:"Inter Tight","Helvetica Neue","Hiragino Sans",Arial,sans-serif;
+  /* nomes antigos usados em partes do código */
+  --paper:var(--bg); --sheet:var(--surface); --rule:var(--line); --accent-soft:var(--soft);
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
-  --paper:#131614; --sheet:#1a1e1c; --ink:#e7e9e4; --ink-2:#a9b0ab; --ink-3:#7a827d; --rule:#2c312e;
-  --accent:#9db4dc; --accent-soft:#232c3a;
-  --s-primavera:#e08aae; --s-verao:#e3a552; --s-outono:#dd8462; --s-inverno:#8fb2cf; --danger:#ec8a7a; color-scheme:dark}}
+  --bg:#111110; --surface:#1c1c1a; --soft:#282724; --ink:#f1f0eb; --ink-2:#aaa79f; --ink-3:#77746d; --line:#2c2b28; --on-ink:#111110;
+  --s-primavera:#a6c19f; --b-primavera:#1f261d; --s-verao:#dcb676; --b-verao:#2a2418; --s-outono:#d59d85; --b-outono:#2b201b; --s-inverno:#a2b6c9; --b-inverno:#1c232a;
+  --accent:#93b0d4; --danger:#e58a77; --ok:#a6c19f; --ok-bg:#1f261d;
+  --shadow:none; --shadow-s:none; --glass:rgba(32,32,30,.82); --glass-b:rgba(255,255,255,.07); color-scheme:dark}}
 :root[data-theme="dark"]{
-  --paper:#131614; --sheet:#1a1e1c; --ink:#e7e9e4; --ink-2:#a9b0ab; --ink-3:#7a827d; --rule:#2c312e;
-  --accent:#9db4dc; --accent-soft:#232c3a;
-  --s-primavera:#e08aae; --s-verao:#e3a552; --s-outono:#dd8462; --s-inverno:#8fb2cf; --danger:#ec8a7a; color-scheme:dark}
+  --bg:#111110; --surface:#1c1c1a; --soft:#282724; --ink:#f1f0eb; --ink-2:#aaa79f; --ink-3:#77746d; --line:#2c2b28; --on-ink:#111110;
+  --s-primavera:#a6c19f; --b-primavera:#1f261d; --s-verao:#dcb676; --b-verao:#2a2418; --s-outono:#d59d85; --b-outono:#2b201b; --s-inverno:#a2b6c9; --b-inverno:#1c232a;
+  --accent:#93b0d4; --danger:#e58a77; --ok:#a6c19f; --ok-bg:#1f261d;
+  --shadow:none; --shadow-s:none; --glass:rgba(32,32,30,.82); --glass-b:rgba(255,255,255,.07); color-scheme:dark}
 *,*::before,*::after{box-sizing:border-box}
-html,body{margin:0;background:var(--paper);color:var(--ink)}
+html,body{margin:0;background:var(--bg);color:var(--ink)}
 [hidden]{display:none!important}
-body{font-family:var(--f-ui);font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased}
-body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--paper)}
-.wrap{max-width:680px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
-button,input,textarea{font:inherit;color:inherit}
-:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
+body{font-family:var(--f-ui);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased;padding-bottom:calc(120px + env(safe-area-inset-bottom,0px))}
+body[data-view="escrever"],body[data-view="livreto"],body[data-view="cartao"]{padding-bottom:calc(30px + env(safe-area-inset-bottom,0px))}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+.wrap{max-width:640px;margin:0 auto;padding-left:max(20px,env(safe-area-inset-left,0px));padding-right:max(20px,env(safe-area-inset-right,0px))}
+button,input,textarea,select{font:inherit;color:inherit}
+button{-webkit-tap-highlight-color:transparent}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:8px}
+svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;display:block}
+.c-primavera{--c:var(--s-primavera);--cb:var(--b-primavera)} .c-verao{--c:var(--s-verao);--cb:var(--b-verao)}
+.c-outono{--c:var(--s-outono);--cb:var(--b-outono)} .c-inverno{--c:var(--s-inverno);--cb:var(--b-inverno)}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--c,var(--ink-3));display:inline-block;flex:none}
 
 /* topo */
-header.top{padding-block:28px 6px}
-.brand{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap}
-h1{font-family:var(--f-poem);font-weight:600;font-size:30px;letter-spacing:.02em;margin:0;text-wrap:balance}
-h1 .kanji{font-size:.62em;color:var(--ink-3);margin-left:.4em;letter-spacing:.1em;font-weight:400}
-.sub{color:var(--ink-2);font-size:13px;margin:2px 0 0;font-variant-numeric:tabular-nums}
-.top-actions{display:flex;gap:8px;flex-wrap:wrap}
+header.top{padding-top:calc(20px + env(safe-area-inset-top,0px))}
+.hd{display:flex;justify-content:space-between;align-items:flex-end;gap:12px}
+.eyebrow{margin:0 0 8px;font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);line-height:1}
+h1{margin:0;font-size:34px;font-weight:800;line-height:1.05;letter-spacing:-.035em}
+.top-actions{display:flex;gap:10px;margin-bottom:-2px}
+.ibtn{width:42px;height:42px;border-radius:50%;border:0;background:var(--surface);display:grid;place-items:center;cursor:pointer;box-shadow:var(--shadow-s);position:relative;color:var(--ink);padding:0;flex:none}
+.ibtn[aria-pressed="true"]{background:var(--ink);color:var(--on-ink)}
+.sync-pill .sd{position:absolute;top:8px;right:8px;width:9px;height:9px;border-radius:50%;background:var(--ink-3);border:2px solid var(--surface)}
+.sync-pill.ok .sd{background:#5f9a6a}.sync-pill.wait .sd{background:var(--s-verao)}.sync-pill.err .sd{background:var(--danger)}
+.sync-pill.busy .sd{animation:pulse 1s infinite alternate}
+@keyframes pulse{to{opacity:.3}}
+.status{font-size:13px;color:var(--ink-2);background:var(--surface);border-radius:16px;padding:12px 14px;margin-top:16px;box-shadow:var(--shadow-s)}
 
-.btn{border:1px solid var(--rule);background:var(--sheet);border-radius:999px;padding:7px 14px;cursor:pointer;font-size:13px;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
-.btn:hover{border-color:var(--ink-3)}
-.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--sheet);font-weight:500}
-.btn.primary:hover{filter:brightness(1.08)}
-.btn.ghost{background:transparent;border-color:transparent;color:var(--ink-2);padding:5px 8px}
-.btn.ghost:hover{color:var(--ink);border-color:var(--rule)}
-.btn[disabled]{opacity:.45;cursor:not-allowed}
-
-/* barra fixa */
-.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--paper);padding-block:10px 0;border-bottom:1px solid var(--rule)}
-.search{position:relative}
-.search input{width:100%;box-sizing:border-box;border:1px solid var(--rule);background:var(--sheet);border-radius:10px;padding:10px 36px 10px 38px;font-size:15px}
-.search input::placeholder{color:var(--ink-3)}
-.search svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--ink-3)}
-.search .clear{position:absolute;right:6px;top:50%;transform:translateY(-50%)}
-.tabs{display:flex;gap:2px;overflow-x:auto;scrollbar-width:none;margin-top:8px}
-.tabs::-webkit-scrollbar{display:none}
-.tab{border:0;background:none;padding:9px 12px 10px;cursor:pointer;color:var(--ink-2);font-size:14px;border-bottom:2px solid transparent;white-space:nowrap;display:flex;align-items:center;gap:7px}
-.tab .c{font-size:11.5px;color:var(--ink-3);font-variant-numeric:tabular-nums}
-.tab[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--tab-c,var(--ink));font-weight:500}
-.dot{width:7px;height:7px;border-radius:50%;background:var(--c,var(--ink-3));display:inline-block;flex:none}
-.c-primavera{--c:var(--s-primavera)} .c-verao{--c:var(--s-verao)} .c-outono{--c:var(--s-outono)} .c-inverno{--c:var(--s-inverno)}
-.listinfo{display:flex;justify-content:space-between;align-items:center;gap:8px;padding-block:10px;color:var(--ink-2);font-size:12.5px}
-
-/* compositor */
-#composer{background:var(--sheet);border:1px solid var(--rule);border-radius:14px;padding:18px;margin-block:16px;display:grid;gap:12px}
-#composer h2{margin:0;font-size:13px;font-weight:500;color:var(--ink-2);letter-spacing:.06em;text-transform:uppercase}
-#f-text{width:100%;box-sizing:border-box;border:0;border-bottom:1px solid var(--rule);background:transparent;font-family:var(--f-poem);font-size:21px;line-height:1.7;resize:vertical;min-height:120px;padding:4px 0}
-#f-text:focus{outline:none;border-bottom-color:var(--accent)}
-.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
-.field{display:grid;gap:4px;font-size:12px;color:var(--ink-2)}
-.field input,.field textarea{border:1px solid var(--rule);background:var(--paper);border-radius:8px;padding:7px 9px;font-size:14px;box-sizing:border-box;width:100%}
-.field textarea{resize:vertical;min-height:60px}
-.chips{display:flex;gap:6px;flex-wrap:wrap}
-.chip{border:1px solid var(--rule);background:var(--paper);border-radius:999px;padding:5px 11px;font-size:13px;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
-.chip[aria-pressed="true"]{border-color:var(--c);background:color-mix(in srgb,var(--c) 14%,var(--sheet));color:var(--ink)}
-.auto-tag{font-size:11px;color:var(--ink-3)}
-details.more summary{cursor:pointer;color:var(--ink-2);font-size:13px}
-details.more[open] summary{margin-bottom:10px}
-.more-grid{display:grid;gap:10px;grid-template-columns:1fr 1fr}
-.more-grid .wide{grid-column:1/-1}
-@media (max-width:520px){.more-grid{grid-template-columns:1fr}}
-.composer-foot{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
-.hint{font-size:12px;color:var(--ink-3)}
-.syl{font-size:12px;color:var(--ink-3);font-variant-numeric:tabular-nums}
-
-/* destaques */
-.feature{border:1px solid var(--rule);background:var(--sheet);border-radius:14px;padding:16px 18px;margin-block:14px}
-.feature .lbl{font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);display:flex;justify-content:space-between;align-items:center;gap:8px}
-.feature .hk{border:0;padding-block:10px 2px}
-.feature .hk + .hk{border-top:1px dashed var(--rule)}
-
-/* lista */
-.band{display:flex;align-items:center;gap:10px;margin-top:34px;margin-bottom:4px;font-family:var(--f-poem);font-size:19px;font-weight:600;color:var(--c,var(--ink))}
-.band::after{content:"";flex:1;height:1px;background:color-mix(in srgb,var(--c,var(--ink-3)) 35%,transparent)}
-.band small{font-family:var(--f-ui);font-size:12px;font-weight:400;color:var(--ink-3)}
-.month{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-2);margin-top:22px;margin-bottom:2px}
-.hk{padding-block:16px;border-bottom:1px solid var(--rule);display:grid;gap:6px}
-.hk:last-child{border-bottom:0}
-.meta{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--ink-3);font-variant-numeric:tabular-nums;min-height:26px}
-.meta .num{color:var(--ink-2);font-weight:500;min-width:2.4em}
-.meta .acts{margin-left:auto;display:flex;gap:2px;opacity:.0;transition:opacity .15s}
-.hk:hover .acts,.hk:focus-within .acts{opacity:1}
-@media (hover:none){.meta .acts{opacity:1}}
-.note{font-size:13.5px;color:var(--ink-2);font-style:italic;margin:0;max-width:62ch}
-.jp{font-family:var(--f-poem);font-size:19px;margin:0;letter-spacing:.06em;white-space:pre-line}
-.ro{font-size:13px;color:var(--ink-3);margin:0;white-space:pre-line}
-.poem{font-family:var(--f-poem);font-size:19px;line-height:1.75;margin:0;white-space:pre-line;overflow-wrap:anywhere}
-.place{font-size:12px;color:var(--ink-3);margin:0}
-mark{background:color-mix(in srgb,var(--accent) 22%,transparent);color:inherit;border-radius:3px;padding:0 1px}
-.confirm{display:flex;gap:6px;align-items:center;font-size:12px;color:var(--danger)}
+/* botões e campos */
+.btn{border:0;background:var(--surface);border-radius:999px;padding:10px 16px;cursor:pointer;font-size:14px;font-weight:600;display:inline-flex;align-items:center;justify-content:center;gap:6px;white-space:nowrap;box-shadow:var(--shadow-s);color:var(--ink);letter-spacing:-.005em}
+.btn.primary{background:var(--ink);color:var(--on-ink);box-shadow:none}
+.btn.ghost{background:none;box-shadow:none;color:var(--ink-2);padding:8px 10px}
 .btn.danger{color:var(--danger)}
+.btn[disabled]{opacity:.4;cursor:not-allowed}
+.btn.big{width:100%;height:54px;font-size:16px;font-weight:700}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.field{display:grid;gap:7px;font-size:11.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
+.field input,.field textarea,.field select{border:0;background:var(--surface);border-radius:14px;padding:12px 14px;font-size:16px;font-weight:500;letter-spacing:0;text-transform:none;color:var(--ink);box-shadow:var(--shadow-s);width:100%;font-family:var(--f-ui)}
+.field textarea{resize:vertical;min-height:70px}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{border:0;background:var(--surface);border-radius:999px;padding:8px 14px;font-size:13.5px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:6px;box-shadow:var(--shadow-s);color:var(--ink-2);letter-spacing:0;text-transform:none}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--on-ink)}
+.chip .kj{font-family:var(--f-poem);font-size:14px;font-weight:600}
+.chip .n{font-size:11.5px;opacity:.6}
+.chip.kgc{background:var(--cb);color:var(--c);box-shadow:none}
+.chip.kgc[aria-pressed="true"]{background:var(--c);color:var(--surface)}
+.auto-tag{font-size:11.5px;color:var(--ink-3);font-weight:500;letter-spacing:0;text-transform:none}
+.hint{font-size:12px;color:var(--ink-3)}
+mark{background:color-mix(in srgb,var(--s-verao) 30%,transparent);color:inherit;border-radius:3px;padding:0 1px}
+.toast{position:fixed;left:50%;bottom:calc(100px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--on-ink);padding:10px 18px;border-radius:999px;font-size:13.5px;font-weight:600;z-index:60;max-width:calc(100vw - 40px);text-align:center}
+body[data-view="escrever"] .toast,body[data-view="livreto"] .toast,body[data-view="cartao"] .toast{bottom:auto;top:calc(14px + env(safe-area-inset-top,0px))}
 .empty{text-align:center;color:var(--ink-2);padding:48px 0;font-family:var(--f-poem);font-size:18px}
-.status{font-size:12.5px;color:var(--ink-2);background:var(--accent-soft);border-radius:10px;padding:9px 12px;margin-top:12px}
-.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--paper);padding:9px 16px;border-radius:999px;font-size:13px;z-index:20}
-.kg{font-size:11.5px;color:var(--ink-3);border:1px dashed var(--rule);border-radius:999px;padding:1px 8px}
-.tab-sep{width:1px;background:var(--rule);margin:8px 6px;flex:none}
-.tab-jp{font-family:var(--f-poem);color:var(--accent)}
-/* escansão */
-#syl{display:grid;gap:3px;min-width:0}
-.scan-head{font-size:12px;color:var(--ink-2)}
-.scan-row{display:flex;gap:10px;align-items:baseline;font-size:13px;min-width:0}
-.scan-n{font-variant-numeric:tabular-nums;font-weight:700;color:var(--accent);min-width:1.4em;text-align:right}
-.scan-s{color:var(--ink-2);overflow-wrap:anywhere}
+
+/* barra: busca e estações */
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg)}
+.search{position:relative;display:block;padding-top:14px}
+.search input{width:100%;border:0;background:var(--surface);border-radius:16px;height:48px;padding:0 42px 0 44px;font-size:16px;font-weight:500;box-shadow:var(--shadow-s);color:var(--ink);-webkit-appearance:none;appearance:none}
+.search input::placeholder{color:var(--ink-3)}
+.search input:focus{outline:none;box-shadow:0 0 0 2px color-mix(in srgb,var(--ink) 25%,transparent)}
+.search input::-webkit-search-cancel-button{display:none}
+.search>svg{position:absolute;left:15px;top:calc(14px + 24px);transform:translateY(-50%);color:var(--ink-3)}
+.search .clear{position:absolute;right:4px;top:calc(14px + 24px);transform:translateY(-50%)}
+body[data-view="haicais"]:not(.searching) .search{display:none}
+.tabs{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding:14px 0 10px;margin:0 -20px;padding-left:20px;padding-right:20px}
+.tabs::-webkit-scrollbar{display:none}
+.tab{border:0;background:var(--soft);border-radius:999px;padding:9px 15px;cursor:pointer;color:var(--ink-2);font-size:13.5px;font-weight:600;white-space:nowrap;display:flex;align-items:center;gap:6px;flex:none}
+.tab .kj{font-family:var(--f-poem);font-size:13px;opacity:.75}
+.tab .c{font-size:11.5px;color:var(--ink-3)}
+.tab[aria-selected="true"]{background:var(--ink);color:var(--on-ink)}
+.tab[aria-selected="true"] .c{color:inherit;opacity:.55}
+.listinfo{display:flex;justify-content:space-between;align-items:center;gap:8px;padding-top:10px;color:var(--ink-3);font-size:13px;font-weight:600}
+
+/* destaque: reencontro */
+#featured{padding-top:20px}
+.feat{position:relative;border-radius:26px;padding:22px 22px 20px;overflow:hidden;
+  background:linear-gradient(160deg,var(--cb,var(--soft)) 0%,color-mix(in srgb,var(--cb,var(--soft)) 50%,var(--surface)) 62%,var(--surface) 100%);box-shadow:var(--shadow)}
+.feat .lb{font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--c,var(--ink-2));display:flex;align-items:center;gap:8px;padding-right:40px}
+.feat .lb::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--c,var(--ink-3));flex:none}
+.feat .seal{position:absolute;top:17px;right:20px;font-family:var(--f-poem);font-size:21px;font-weight:600;line-height:1;color:var(--c,var(--ink-3));opacity:.4}
+.feat .poem{font-size:23px;line-height:1.55;font-weight:500;margin:30px 0 18px}
+.feat .jp{margin-top:26px}
+.feat .ft{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:46px}
+.feat .m{font-size:12px;font-weight:600;letter-spacing:.05em;color:var(--ink-2);text-transform:uppercase}
+.feat .go{width:46px;height:46px;border-radius:50%;border:0;background:var(--ink);color:var(--on-ink);display:grid;place-items:center;cursor:pointer;flex:none;padding:0}
+.feat.big{padding:24px 24px 18px;min-height:340px;display:flex;flex-direction:column}
+.feat.big .poem{font-size:26px;margin:auto 0 14px;padding-top:44px}
+.feat.big .kg{align-self:flex-start;margin-bottom:12px}
+.feat.big .ft{border-top:1px solid color-mix(in srgb,var(--c,var(--ink-3)) 18%,transparent);padding-top:10px}
+.re-next{display:flex;justify-content:center;margin-top:16px}
+.sec-t{display:flex;justify-content:space-between;align-items:baseline;margin:30px 0 4px;font-size:20px;font-weight:800;letter-spacing:-.02em}
+
+/* lista de haicais */
+.band{display:flex;align-items:baseline;gap:8px;margin:32px 0 2px;font-size:21px;font-weight:800;letter-spacing:-.025em;color:var(--ink);flex-wrap:wrap}
+.band .kj{font-family:var(--f-poem);font-size:17px;font-weight:600;color:var(--c,var(--ink-3));letter-spacing:0}
+.band small{font-size:12.5px;font-weight:600;color:var(--ink-3);letter-spacing:0}
+.month{font-size:11.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);margin:18px 0 0 4px}
+.hk{background:var(--surface);border-radius:22px;padding:18px 18px 10px;margin-top:10px;box-shadow:var(--shadow);display:grid;gap:8px}
+.hk .poem{font-family:var(--f-poem);font-size:18px;line-height:1.65;margin:0;white-space:pre-line;overflow-wrap:anywhere}
+.poem{font-family:var(--f-poem);white-space:pre-line;overflow-wrap:anywhere;margin:0}
+.note{font-size:13.5px;color:var(--ink-2);font-style:italic;margin:0;max-width:62ch}
+.jp{font-family:var(--f-poem);font-size:18px;margin:0;letter-spacing:.06em;white-space:pre-line}
+.ro{font-size:13px;color:var(--ink-3);margin:0;white-space:pre-line}
+.place{font-size:12.5px;color:var(--ink-3);margin:0}
+.meta{display:flex;align-items:center;gap:8px;min-height:36px}
+.meta .info{display:flex;align-items:center;flex-wrap:wrap;gap:4px 10px;font-size:11.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-3);font-variant-numeric:tabular-nums;min-width:0}
+.meta .tag{color:var(--c,var(--ink-3));display:inline-flex;gap:6px;align-items:center}
+.tag i{font-family:var(--f-poem);font-size:13px;font-style:normal;letter-spacing:0;font-weight:600}
+.kg{text-transform:none;letter-spacing:0;font-weight:600;font-size:12px;background:var(--cb,var(--soft));color:var(--c,var(--ink-2));border-radius:999px;padding:3px 10px}
+.meta .acts{margin-left:auto;display:flex;flex:none;margin-right:-6px}
+.ab{width:36px;height:36px;border:0;background:none;border-radius:50%;display:grid;place-items:center;color:var(--ink-3);cursor:pointer;padding:0}
+.ab svg.i{width:18px;height:18px}
+.ab:hover{background:var(--soft);color:var(--ink)}
+.ab.on{color:var(--gold)}
+.ab.on svg.i{fill:currentColor}
+.confirm{margin-left:auto;display:flex;gap:2px;align-items:center;font-size:12.5px;font-weight:600;color:var(--danger)}
+
+/* escrever */
+#composer{padding-top:calc(14px + env(safe-area-inset-top,0px))}
+.c-top{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.c-top h2{margin:0;font-size:17px;font-weight:700;letter-spacing:-.01em}
+.c-top .ibtn{background:var(--soft);box-shadow:none}
+.c-pills{display:flex;gap:8px;margin-top:18px;flex-wrap:wrap}
+.pill{display:inline-flex;align-items:center;gap:7px;height:40px;padding:0 14px;border-radius:999px;background:var(--surface);box-shadow:var(--shadow-s);font-size:14px;font-weight:600;color:var(--ink-2)}
+.pill svg.i{width:17px;height:17px}
+.pill input{border:0;background:none;font-size:14px;font-weight:600;color:var(--ink);padding:0;min-width:0;font-family:var(--f-ui)}
+.pill input[type=number]{width:56px}
+.pill input[type=date]{-webkit-appearance:none;appearance:none;min-height:22px}
+.paper{margin-top:14px;border-radius:26px;background:var(--surface);padding:22px 20px 18px;box-shadow:var(--shadow)}
+#f-text{width:100%;border:0;background:transparent;font-family:var(--f-poem);font-size:23px;line-height:1.6;resize:none;min-height:130px;padding:0;color:var(--ink);field-sizing:content}
+#f-text:focus{outline:none}
+#f-text::placeholder{color:var(--ink-3)}
+.syl{font-variant-numeric:tabular-nums}
+#syl{display:grid;gap:8px;margin-top:14px;padding-top:14px;border-top:1px solid var(--line);min-width:0}
+#syl:empty{display:none}
+.scan-head{font-size:12px;font-weight:600;color:var(--ink-2)}
+.scan-head .hint{display:block;font-weight:500;margin-top:2px}
+.scan-row{display:flex;gap:10px;align-items:center;font-size:13.5px;min-width:0}
+.scan-n{min-width:38px;height:30px;border-radius:10px;background:var(--soft);display:inline-grid;place-items:center;font-weight:700;font-size:14px;color:var(--ink-2);padding:0 9px;white-space:nowrap;flex:none}
+.scan-n.ok{background:var(--ok-bg);color:var(--ok)}
+.scan-s{color:var(--ink-2);overflow-wrap:anywhere;min-width:0}
 .scan-s i{font-style:normal;color:var(--ink-3);margin:0 2px}
 .scan-s .ton{color:var(--ink);font-weight:700;text-decoration:underline;text-underline-offset:3px}
 .scan-s .post{color:var(--ink-3);opacity:.6}
 .scan-s i.j{margin:0}
 .syl i.opt{font-style:normal;color:var(--accent);font-weight:700}
-.scan-n.rng{min-width:2.6em}
 .scan-s [data-w]{cursor:pointer}
 .scan-s .fx{border-bottom:1px dotted var(--accent)}
-#scan-fix{margin-top:8px;padding:12px;border:1px solid var(--rule);border-radius:10px;display:grid;gap:8px;background:var(--paper)}
+#scan-fix{margin-top:12px;padding:14px;border-radius:16px;display:grid;gap:10px;background:var(--bg)}
 #scan-fix input{font-size:16px}
-#scan-fix p{margin:0;font-size:12px;color:var(--ink-2)}
+#scan-fix p{margin:0;font-size:12.5px;color:var(--ink-2)}
 #scan-fix .fx-err{color:var(--danger)}
-.kigo-found{display:flex;flex-wrap:wrap;gap:10px;font-size:12.5px;color:var(--ink-2);margin-top:4px}
-.kigo-found>span{display:inline-flex;align-items:center;gap:4px;color:var(--ink)}
-#kigo-row{display:flex;flex-direction:column;gap:6px;margin:10px 0 4px}
-#kigo-row .kq{font-size:12px;color:var(--ink-2)}
+.blk{margin-top:22px}
+.blk h4,#kigo-row .kq{display:block;margin:0 0 10px;font-size:11.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3)}
+#kigo-row{margin-top:22px}
+.seas{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.sb{height:66px;border:0;border-radius:16px;background:var(--surface);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:12px;font-weight:600;color:var(--ink-2);box-shadow:var(--shadow-s);cursor:pointer;padding:0}
+.sb i{font-family:var(--f-poem);font-size:20px;font-style:normal;color:var(--c);line-height:1}
+.sb[aria-pressed="true"]{background:var(--ink);color:var(--on-ink)}
+.sb[aria-pressed="true"] i{color:color-mix(in srgb,var(--c) 55%,var(--on-ink))}
+details.more{margin-top:22px;background:var(--surface);border-radius:18px;box-shadow:var(--shadow-s)}
+details.more summary{cursor:pointer;color:var(--ink-2);font-size:14px;font-weight:600;padding:14px 16px;list-style:none;display:flex;justify-content:space-between}
+details.more summary::-webkit-details-marker{display:none}
+details.more summary::after{content:"+";font-size:18px;line-height:1;color:var(--ink-3)}
+details.more[open] summary::after{content:"–"}
+.more-grid{display:grid;gap:12px;padding:0 16px 16px}
+.more-grid .field input,.more-grid .field textarea{background:var(--bg);box-shadow:none}
+.c-save{position:sticky;bottom:calc(14px + env(safe-area-inset-bottom,0px));margin-top:26px;z-index:4}
+
 /* saijiki */
-.kigo-head{display:grid;gap:10px;margin-top:6px}
-.kigo-intro{margin:0;font-size:13.5px;color:var(--ink-2);max-width:65ch}
-.kigo-intro span{font-family:var(--f-poem);color:var(--accent)}
-.mine{font-size:13px;color:var(--ink-2);display:flex;gap:6px;align-items:center}
-.kigo-list{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
-.kigo{border:1px solid var(--rule);background:var(--sheet);border-radius:8px;padding:5px 10px;font-family:var(--f-poem);font-size:15px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;text-align:left}
-.kigo:hover{border-color:var(--c)}
+.kigo-intro{margin:14px 0 0;font-size:13.5px;color:var(--ink-2);max-width:65ch}
+.sgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
+.sg{height:132px;border:0;border-radius:22px;padding:16px;position:relative;overflow:hidden;text-align:left;background:var(--cb);color:color-mix(in srgb,var(--c) 72%,var(--ink));cursor:pointer;display:flex;flex-direction:column;align-items:flex-start}
+.sg b{font-size:19px;font-weight:800;letter-spacing:-.02em}
+.sg small{font-size:12px;font-weight:600;opacity:.75}
+.sg .n{margin-top:auto;font-size:11.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;opacity:.65}
+.sg .k{position:absolute;right:-6px;bottom:-24px;font-family:var(--f-poem);font-size:96px;font-weight:700;line-height:1;opacity:.16}
+.khead{display:flex;align-items:center;gap:12px;margin-top:14px;padding:14px 16px;border-radius:20px;background:var(--cb)}
+.khead .kj{font-family:var(--f-poem);font-size:30px;font-weight:600;color:var(--c);line-height:1}
+.khead b{display:block;font-size:18px;font-weight:800;letter-spacing:-.02em;color:color-mix(in srgb,var(--c) 72%,var(--ink))}
+.khead small{font-size:12.5px;font-weight:600;color:color-mix(in srgb,var(--c) 60%,var(--ink-2))}
+.khead .ibtn{margin-left:auto}
+.kcats{margin-top:14px;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;margin-left:-20px;margin-right:-20px;padding:0 20px 2px}
+.kcats::-webkit-scrollbar{display:none}
+.kcats .chip{flex:none}
+.mine{font-size:13.5px;font-weight:500;color:var(--ink-2);display:flex;gap:8px;align-items:center;margin-top:14px}
+.mine input{width:18px;height:18px;accent-color:var(--ink)}
+.kgrp{margin:24px 0 10px;font-size:11.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3)}
+.kgrp.s{font-size:20px;font-weight:800;letter-spacing:-.02em;text-transform:none;color:var(--ink);margin-top:30px}
+.kigo-list{display:flex;flex-wrap:wrap;gap:8px}
+.kigo{border:0;background:var(--surface);border-radius:999px;padding:8px 14px;font-family:var(--f-poem);font-size:15px;cursor:pointer;display:inline-flex;align-items:center;gap:7px;text-align:left;box-shadow:var(--shadow-s);color:var(--ink)}
 .kobs{font-family:var(--f-ui);font-size:11.5px;color:var(--ink-3)}
-.kn{font-family:var(--f-ui);font-size:11px;font-weight:700;color:var(--sheet);background:var(--c);border-radius:999px;padding:0 6px;font-variant-numeric:tabular-nums}
-/* nuvem / ajustes */
-#cloud{background:var(--sheet);border:1px solid var(--rule);border-radius:14px;padding:16px;margin-top:14px;display:grid;gap:12px}
-#cloud h2{margin:0;font-family:var(--f-poem);font-size:20px;font-weight:600}
+.kn{font-family:var(--f-ui);font-size:11px;font-weight:700;color:var(--surface);background:var(--c);border-radius:999px;padding:1px 7px;font-variant-numeric:tabular-nums}
+
+/* você */
+.vstats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:18px}
+.vstats div{background:var(--surface);border-radius:20px;padding:16px 14px;box-shadow:var(--shadow)}
+.vstats b{display:block;font-size:26px;font-weight:800;letter-spacing:-.03em;line-height:1.1;font-variant-numeric:tabular-nums}
+.vstats span{font-size:12.5px;font-weight:600;color:var(--ink-3)}
+#sub{margin:10px 2px 0;font-size:13px;color:var(--ink-3);font-weight:500}
+.vgroup{margin-top:22px;background:var(--surface);border-radius:22px;box-shadow:var(--shadow);overflow:hidden}
+.vh{margin:26px 4px 10px;font-size:11.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3)}
+.vh + .vgroup{margin-top:0}
+.vrow{display:flex;align-items:center;gap:14px;width:100%;border:0;background:none;padding:15px 16px;font-size:15.5px;font-weight:600;color:var(--ink);cursor:pointer;text-align:left;letter-spacing:-.01em}
+.vrow + .vrow{border-top:1px solid var(--line)}
+.vrow .vi{width:34px;height:34px;border-radius:11px;background:var(--soft);display:grid;place-items:center;flex:none;color:var(--ink-2)}
+.vrow .vi svg.i{width:18px;height:18px}
+.vrow .vc{margin-left:auto;font-size:13px;color:var(--ink-3);font-weight:600}
+.vrow .chev{color:var(--ink-3);margin-left:6px}
+.vrow .vc + .chev{margin-left:0}
+.vrow .vc:empty + .chev{margin-left:auto}
+#cloud{margin-top:22px;background:var(--surface);border-radius:22px;padding:18px;box-shadow:var(--shadow);display:grid;gap:12px}
+#cloud h2{margin:0;font-size:18px;font-weight:800;letter-spacing:-.02em;display:flex;flex-direction:column;align-items:flex-start;gap:6px}
+.sync-line{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;font-weight:600;color:var(--ink-2);letter-spacing:0}
+.sync-line .sd{width:8px;height:8px;border-radius:50%;background:var(--ink-3)}
+.sync-line.ok .sd{background:#5f9a6a}.sync-line.wait .sd{background:var(--s-verao)}.sync-line.err .sd{background:var(--danger)}
 #cloud p{margin:0;font-size:13.5px;color:var(--ink-2)}
-#cloud .row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
-#cloud input[type=email],#cloud input[type=password]{flex:1 1 200px;min-width:0;border:1px solid var(--rule);background:var(--paper);border-radius:10px;padding:10px 12px;font-size:16px}
-#cloud .note-box{background:var(--accent-soft);color:var(--ink);border-radius:10px;padding:9px 12px}
+#cloud input[type=email],#cloud input[type=password]{flex:1 1 200px;min-width:0;border:0;background:var(--bg);border-radius:14px;padding:12px 14px;font-size:16px;color:var(--ink)}
+#cloud .note-box{background:var(--bg);color:var(--ink);border-radius:14px;padding:10px 12px}
 #cloud .note-box:empty{display:none}
-#cloud .sec{border-top:1px solid var(--rule);padding-top:12px;display:grid;gap:8px}
-#cloud .sec h3{margin:0;font-size:13px;font-weight:700;color:var(--ink-2);letter-spacing:.02em}
-.sync-pill{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--ink-2);background:none;border:0;padding:2px 0;cursor:pointer}
-.sync-pill .sd{width:8px;height:8px;border-radius:50%;background:var(--ink-3)}
-.sync-pill.ok .sd{background:#4f8a5b}.sync-pill.wait .sd{background:var(--s-verao)}.sync-pill.err .sd{background:var(--danger)}
-.sync-pill.busy .sd{animation:pulse 1s infinite alternate}
-@keyframes pulse{to{opacity:.3}}
-/* botões-ícone do topo */
-.btn.icon{width:38px;height:38px;padding:0;justify-content:center;font-size:16px}
-.btn.icon .kj{font-family:var(--f-poem);font-size:17px;color:var(--accent);line-height:1}
-.top-actions{align-items:center}
-.btn.icon[aria-current="page"]{border-color:var(--accent);background:var(--accent-soft);color:var(--accent)}
-.btn.primary[aria-current="page"]{box-shadow:0 0 0 3px var(--accent-soft)}
-.page-title{font-family:var(--f-poem);font-size:24px;font-weight:600;margin:18px 0 4px}
-/* menu */
-#menu{position:fixed;inset:0;z-index:40}
-.menu-back{position:absolute;inset:0;background:rgba(10,12,11,.38)}
-.menu-panel{position:absolute;top:0;right:0;bottom:0;width:min(330px,86vw);background:var(--sheet);border-left:1px solid var(--rule);overflow:auto;-webkit-overflow-scrolling:touch;padding:calc(14px + env(safe-area-inset-top,0px)) 14px calc(24px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:2px;box-shadow:-8px 0 30px rgba(0,0,0,.12);animation:menuIn .18s ease-out}
-@keyframes menuIn{from{transform:translateX(24px);opacity:.4}}
-.menu-head{display:flex;align-items:center;justify-content:space-between;margin:0 0 10px 4px}
-.menu-head strong{font-family:var(--f-poem);font-size:21px;font-weight:600}
-.menu-head strong span{font-size:.65em;color:var(--ink-3);margin-left:6px;font-weight:400}
-.mh{margin:14px 6px 4px;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3)}
-.mi{display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:none;border:0;border-radius:10px;padding:10px 10px;font-size:15px;color:var(--ink);cursor:pointer}
-.mi:hover,.mi:focus-visible{background:var(--accent-soft)}
-.mi .ic{width:22px;display:inline-flex;justify-content:center;color:var(--ink-2);flex:none}
-.mi .ic.kj{font-family:var(--f-poem);color:var(--accent);font-size:17px}
-.mi .mc{margin-left:auto;font-size:12px;color:var(--ink-3);font-variant-numeric:tabular-nums}
-.mi.primary{background:var(--accent);color:var(--sheet);font-weight:500;justify-content:center;margin-bottom:4px}
-.mi.primary:hover{filter:brightness(1.08);background:var(--accent)}
-.mi.on{font-weight:700}
-/* favoritos */
-.star{margin-left:auto;border:0;background:none;cursor:pointer;font-size:16px;line-height:1;padding:4px 6px;color:var(--ink-3)}
-.acts + .star{margin-left:0}
-.star.on{color:#c9932b}
-/* livreto: formulário */
-#bookform{background:var(--sheet);border:1px solid var(--rule);border-radius:14px;padding:18px;margin-block:14px;display:grid;gap:14px}
-#bookform h2{margin:0;font-family:var(--f-poem);font-size:20px;font-weight:600}
-#bookform h2 span{color:var(--accent);margin-left:6px}
-#bookform .chip{--c:var(--accent)}
-.bk-p{margin:0;font-size:13px;color:var(--ink-2)}
-.bk-grid{display:grid;gap:10px;grid-template-columns:1fr 1fr}
+
+/* livreto e cartão */
+#bookform,#sharecard{margin-top:18px;display:grid;gap:18px}
+#bookform>h2,#sharecard>h2{display:none}
+.bk-p{margin:0;font-size:13.5px;color:var(--ink-2);letter-spacing:0;text-transform:none;font-weight:500}
+.bk-grid{display:grid;gap:14px;grid-template-columns:1fr 1fr}
 .bk-grid .wide{grid-column:1/-1}
 @media (max-width:520px){.bk-grid{grid-template-columns:1fr}}
-.field select{border:1px solid var(--rule);background:var(--paper);border-radius:8px;padding:7px 9px;font-size:14px;width:100%;color:var(--ink)}
-#bookform input,#bookform select{font-size:16px}
-.checks{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:13px;color:var(--ink)}
-.checks label{display:inline-flex;gap:6px;align-items:center;white-space:nowrap}
-.checks input{width:auto;padding:0;margin:0}
-#bookform{scroll-margin-top:140px}
-.btn.book{font-size:12.5px}
-/* cartão para compartilhar */
-#sharecard{background:var(--sheet);border:1px solid var(--rule);border-radius:14px;padding:18px;margin-block:14px;display:grid;gap:14px}
-#sharecard h2{margin:0;font-family:var(--f-poem);font-size:20px;font-weight:600}
-#sharecard h2 span{color:var(--accent);margin-left:6px}
-#sharecard .chip{--c:var(--accent)}
-#sc-prev{display:flex;justify-content:center;background:var(--paper);border-radius:10px;padding:12px}
-#sc-canvas{display:block;max-width:100%;max-height:58vh;width:auto;height:auto;border-radius:4px;box-shadow:0 4px 18px rgba(0,0,0,.14)}
+.checks{display:flex;flex-wrap:wrap;gap:10px 16px;font-size:14px;font-weight:500;color:var(--ink);letter-spacing:0;text-transform:none;background:var(--surface);border-radius:16px;padding:14px;box-shadow:var(--shadow-s)}
+.checks label{display:inline-flex;gap:7px;align-items:center;white-space:nowrap}
+.checks input{width:18px;height:18px;margin:0;accent-color:var(--ink)}
+.composer-foot{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;position:sticky;bottom:calc(14px + env(safe-area-inset-bottom,0px));background:var(--glass);-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);border-radius:24px;padding:10px 10px 10px 16px;box-shadow:var(--shadow);z-index:4}
+#bk-count{font-size:13px;font-weight:600}
+#sc-prev{display:flex;justify-content:center;background:var(--soft);border-radius:22px;padding:16px}
+#sc-canvas{display:block;max-width:100%;max-height:56vh;width:auto;height:auto;border-radius:6px;box-shadow:0 6px 22px rgba(0,0,0,.14)}
 #sharecard input[type=text]{font-size:16px}
-.btn.ic-share{padding:7px 9px}
-.btn.ic-share svg{display:block}
+
+/* barra de ícones */
+.tabbar{position:fixed;z-index:30;left:max(20px,calc(50% - 300px));right:max(20px,calc(50% - 300px));bottom:calc(14px + env(safe-area-inset-bottom,0px));height:66px;border-radius:33px;display:flex;justify-content:space-around;align-items:center;padding:0 6px;
+  background:var(--glass);-webkit-backdrop-filter:blur(20px) saturate(1.4);backdrop-filter:blur(20px) saturate(1.4);border:1px solid var(--glass-b);box-shadow:0 10px 30px rgba(20,20,20,.10),0 1px 3px rgba(20,20,20,.06)}
+body[data-view="escrever"] .tabbar,body[data-view="livreto"] .tabbar,body[data-view="cartao"] .tabbar{display:none}
+.tbb{width:54px;height:50px;border:0;background:none;border-radius:25px;display:grid;place-items:center;color:var(--ink-3);cursor:pointer;position:relative;padding:0}
+.tbb svg.i{width:24px;height:24px;stroke-width:1.7}
+.tbb .kj{font-family:var(--f-poem);font-size:22px;font-weight:600;line-height:1}
+.tbb[aria-current="page"]{color:var(--ink)}
+.tbb[aria-current="page"]::after{content:"";position:absolute;bottom:3px;width:5px;height:5px;border-radius:50%;background:var(--ink)}
+.tbb.plus{width:58px;height:46px;border-radius:18px;background:var(--ink);color:var(--on-ink)}
+.tbb.plus svg.i{stroke-width:2.2}
+
 /* livreto: visualização */
-#bookview{position:fixed;inset:0;z-index:50;overflow:auto;background:#e6e5df;-webkit-overflow-scrolling:touch}
-.bk-bar{position:sticky;top:0;z-index:2;display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:10px 16px;padding-top:calc(10px + env(safe-area-inset-top,0px));background:var(--paper);border-bottom:1px solid var(--rule)}
+#bookview{position:fixed;inset:0;z-index:70;overflow:auto;background:#e6e5df;-webkit-overflow-scrolling:touch}
+.bk-bar{position:sticky;top:0;z-index:2;display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:10px 16px;padding-top:calc(10px + env(safe-area-inset-top,0px));background:var(--bg);border-bottom:1px solid var(--line)}
 .bk-bar .grow{flex:1;min-width:110px;font-size:12.5px;color:var(--ink-2)}
 .bk-tip{font-size:12px;color:#5a5a55;max-width:600px;margin:12px auto 0;padding:0 16px;line-height:1.5}
-footer{padding-block:40px 60px;color:var(--ink-3);font-size:12px;text-align:center}
-@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+footer{padding-block:34px 10px;color:var(--ink-3);font-size:12px;text-align:center}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 <style id="book-css"></style>
 <style id="page-size"></style>
@@ -245,24 +307,85 @@ footer{padding-block:40px 60px;color:var(--ink-3);font-size:12px;text-align:cent
 
 <div class="wrap">
   <header class="top">
-    <div class="brand">
+    <div class="hd">
       <div>
-        <h1>Haicais<span class="kanji" lang="ja">俳句帳</span></h1>
-        <p class="sub" id="sub">Carregando o caderno…</p>
-        <button class="sync-pill" id="sync-pill" type="button"><span class="sd"></span><span id="sync-txt">Só neste aparelho</span></button>
+        <p class="eyebrow" id="eyebrow"></p>
+        <h1 id="h1">Caderno</h1>
       </div>
       <div class="top-actions">
-        <button class="btn icon" id="btn-menu" type="button" aria-label="Menu" title="Menu"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
-        <button class="btn icon" id="btn-home" type="button" aria-label="Meus haicais" title="Meus haicais"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h4"/></svg></button>
-        <button class="btn icon" id="btn-kigos" type="button" aria-label="Saijiki (kigos)" title="Saijiki · kigos"><span class="kj" lang="ja">季</span></button>
-        <button class="btn icon" id="btn-book-top" type="button" aria-label="Fazer livreto" title="Fazer livreto"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 5.5c2.8-1.3 6.2-1.3 10 .8 3.8-2.1 7.2-2.1 10-.8v13c-2.8-1.3-6.2-1.3-10 .8-3.8-2.1-7.2-2.1-10-.8z"/><path d="M12 6.3v13"/></svg></button>
-        <button class="btn icon" id="btn-cloud" type="button" aria-label="Nuvem e backup" title="Nuvem e backup"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 18.5h10.5a4 4 0 0 0 .6-7.95A6 6 0 0 0 6.6 9.1 4.75 4.75 0 0 0 7 18.5z"/></svg></button>
-        <button class="btn primary" id="btn-write" type="button">+ Escrever</button>
+        <button class="ibtn" id="btn-search" type="button" aria-label="Buscar" aria-pressed="false"><svg class="i" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></button>
+        <button class="ibtn sync-pill" id="sync-pill" type="button" aria-label="Nuvem e backup"><svg class="i" viewBox="0 0 24 24"><path d="M7 18.5h10.5a4 4 0 0 0 .6-7.95A6 6 0 0 0 6.6 9.1 4.75 4.75 0 0 0 7 18.5z"/></svg><span class="sd"></span></button>
       </div>
     </div>
     <div class="status" id="status" hidden></div>
-    <section id="cloud" hidden aria-label="Nuvem e backup">
-      <h2>Nuvem e backup</h2>
+  </header>
+
+  <section id="composer" hidden aria-label="Escrever haicai">
+    <div class="c-top">
+      <button class="ibtn" id="btn-cancel" type="button" aria-label="Fechar sem guardar"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+      <h2 id="composer-title">Novo haicai</h2>
+      <span style="width:42px"></span>
+    </div>
+    <div class="c-pills">
+      <label class="pill"><svg class="i" viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="15" rx="3"/><path d="M4 10h16M9 3v4M15 3v4"/></svg><input type="date" id="f-date" aria-label="Data"></label>
+      <label class="pill">nº<input type="number" id="f-num" min="1" inputmode="numeric" aria-label="Número"></label>
+    </div>
+    <div class="paper">
+      <textarea id="f-text" rows="3" placeholder="primeira linha&#10;segunda linha&#10;terceira linha" aria-label="Texto do haicai"></textarea>
+      <div class="syl" id="syl" aria-live="polite"></div>
+      <div id="scan-fix" hidden></div>
+    </div>
+    <div id="kigo-row" hidden aria-live="polite"></div>
+    <div class="blk"><h4>Estação <span class="auto-tag" id="season-auto"></span></h4>
+      <div class="seas" id="f-season" role="group" aria-label="Estação"></div>
+    </div>
+    <details class="more" id="f-more">
+      <summary>Contexto, japonês e lugar</summary>
+      <div class="more-grid">
+        <label class="field">Contexto (texto que vem antes do haicai)<textarea id="f-note" rows="2"></textarea></label>
+        <label class="field">Original em japonês<input id="f-jp" lang="ja"></label>
+        <label class="field">Romaji<input id="f-ro" placeholder="furu ike ya / kawazu tobikomu / mizu no oto"></label>
+        <label class="field">Lugar<input id="f-place" placeholder="ex.: Florianópolis/SC"></label>
+      </div>
+    </details>
+    <div class="c-save"><button class="btn primary big" id="btn-save" type="button">Guardar haicai</button></div>
+  </section>
+
+  <div id="featured"></div>
+</div>
+
+<div class="bar">
+  <div class="wrap">
+    <label class="search">
+      <svg class="i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input id="q" type="search" placeholder="Buscar palavras, datas, kigo, número…" autocomplete="off" aria-label="Buscar">
+      <button class="btn ghost clear" id="q-clear" type="button" hidden aria-label="Limpar busca">✕</button>
+    </label>
+    <div class="tabs" role="tablist" id="tabs"></div>
+  </div>
+</div>
+
+<main class="wrap">
+  <div class="listinfo">
+    <span id="count"></span>
+    <button class="btn ghost" id="btn-order" type="button"></button>
+  </div>
+
+  <section id="reencontro" hidden aria-label="Reencontrar">
+    <div id="re-card" style="margin-top:18px"></div>
+    <div class="re-next"><button class="btn primary" type="button" data-act="rand"><svg class="i" viewBox="0 0 24 24"><path d="M4 4v6h6M20 20v-6h-6M5 15a7 7 0 0 0 12.5 2.5M19 9A7 7 0 0 0 6.5 6.5"/></svg>Outro haicai</button></div>
+    <div id="re-day"></div>
+  </section>
+
+  <section id="voce" hidden aria-label="Você">
+    <div class="vstats" id="vstats"></div>
+    <p id="sub">Carregando o caderno…</p>
+    <div class="vgroup">
+      <button class="vrow" type="button" data-go="fav"><span class="vi" style="color:var(--gold)"><svg class="i" viewBox="0 0 24 24" style="fill:currentColor"><path d="m12 3.5 2.6 5.3 5.9.9-4.3 4.1 1 5.8-5.2-2.7-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z"/></svg></span>Favoritos<span class="vc" id="v-fav"></span><svg class="i chev" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></svg></button>
+      <button class="vrow" type="button" data-go="book"><span class="vi"><svg class="i" viewBox="0 0 24 24"><path d="M2 5.5c2.8-1.3 6.2-1.3 10 .8 3.8-2.1 7.2-2.1 10-.8v13c-2.8-1.3-6.2-1.3-10 .8-3.8-2.1-7.2-2.1-10-.8z"/><path d="M12 6.3v13"/></svg></span>Fazer livreto<span class="vc"></span><svg class="i chev" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></svg></button>
+    </div>
+    <section id="cloud" aria-label="Nuvem e backup">
+      <h2>Nuvem e backup <span class="sync-line" id="sync-line"><span class="sd"></span><span id="sync-txt">Só neste aparelho</span></span></h2>
       <p id="cloud-state"></p>
       <p id="cloud-note" class="note-box"></p>
       <div id="cloud-login" class="row" hidden>
@@ -280,71 +403,16 @@ footer{padding-block:40px 60px;color:var(--ink-3);font-size:12px;text-align:cent
         <button class="btn primary" id="c-sync" type="button">Sincronizar agora</button>
         <button class="btn ghost" id="c-logout" type="button">Sair</button>
       </div>
-      <div class="sec">
-        <h3>Cópias</h3>
-        <div class="row">
-          <button class="btn" id="btn-export" type="button">Baixar em texto (.txt)</button>
-          <button class="btn" id="btn-backup" type="button">Baixar backup completo (.json)</button>
-          <label class="btn" for="f-import" style="cursor:pointer">Importar backup…</label>
-          <input type="file" id="f-import" accept=".json,application/json" hidden>
-        </div>
-      </div>
-      <div class="row"><button class="btn ghost" id="c-close" type="button">Fechar</button></div>
     </section>
-  </header>
-
-  <section id="composer" hidden aria-label="Escrever haicai">
-    <h2 id="composer-title">Novo haicai</h2>
-    <textarea id="f-text" rows="3" placeholder="primeira linha&#10;segunda linha&#10;terceira linha" aria-label="Texto do haicai"></textarea>
-    <div id="kigo-row" hidden aria-live="polite"></div>
-    <div class="row">
-      <label class="field">Data<input type="date" id="f-date"></label>
-      <label class="field" style="width:90px">Número<input type="number" id="f-num" min="1" inputmode="numeric"></label>
-      <div class="field">Estação <span class="auto-tag" id="season-auto"></span>
-        <div class="chips" id="f-season" role="group" aria-label="Estação"></div>
-      </div>
-    </div>
-    <details class="more" id="f-more">
-      <summary>Contexto, original em japonês e lugar</summary>
-      <div class="more-grid">
-        <label class="field wide">Contexto (texto que vem antes do haicai)<textarea id="f-note" rows="2"></textarea></label>
-        <label class="field">Original em japonês<input id="f-jp" lang="ja"></label>
-        <label class="field">Romaji<input id="f-ro" placeholder="furu ike ya / kawazu tobikomu / mizu no oto"></label>
-        <label class="field wide">Lugar<input id="f-place" placeholder="ex.: Florianópolis/SC"></label>
-      </div>
-    </details>
-    <div class="syl" id="syl" aria-live="polite"></div>
-    <div id="scan-fix" hidden></div>
-    <div class="composer-foot">
-      <span></span>
-      <div class="row">
-        <span class="hint">⌘ + Enter salva</span>
-        <button class="btn" id="btn-cancel" type="button">Cancelar</button>
-        <button class="btn primary" id="btn-save" type="button">Guardar</button>
-      </div>
+    <p class="vh">Cópias</p>
+    <div class="vgroup">
+      <button class="vrow" type="button" id="btn-export"><span class="vi"><svg class="i" viewBox="0 0 24 24"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg></span>Baixar em texto (.txt)</button>
+      <button class="vrow" type="button" id="btn-backup"><span class="vi"><svg class="i" viewBox="0 0 24 24"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg></span>Baixar backup completo</button>
+      <label class="vrow" for="f-import"><span class="vi"><svg class="i" viewBox="0 0 24 24"><path d="M12 15V4M7 9l5-5 5 5M5 20h14"/></svg></span>Importar backup…</label>
+      <input type="file" id="f-import" accept=".json,application/json" hidden>
     </div>
   </section>
 
-  <div id="featured"></div>
-</div>
-
-<div class="wrap" id="kigos-head" hidden><h2 class="page-title">Saijiki <span lang="ja" style="color:var(--accent);font-size:.7em">歳時記</span></h2></div>
-<div class="bar">
-  <div class="wrap">
-    <label class="search">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-      <input id="q" type="search" placeholder="Buscar palavras, datas, kigo, número…" autocomplete="off" aria-label="Buscar">
-      <button class="btn ghost clear" id="q-clear" type="button" hidden aria-label="Limpar busca">✕</button>
-    </label>
-    <div class="tabs" role="tablist" id="tabs"></div>
-  </div>
-</div>
-
-<main class="wrap">
-  <div class="listinfo">
-    <span id="count"></span>
-    <button class="btn ghost" id="btn-order" type="button"></button>
-  </div>
   <section id="bookform" hidden aria-label="Fazer livreto">
     <h2>Fazer livreto<span lang="ja">句集</span></h2>
     <p class="bk-p">Escolha quais haicais entram. O livreto abre pronto para imprimir ou salvar em PDF.</p>
@@ -369,7 +437,7 @@ footer{padding-block:40px 60px;color:var(--ink-3);font-size:12px;text-align:cent
       <label class="field wide bk-sub" data-for="nums">Números dos haicais<input id="bk-nums" inputmode="numeric" placeholder="ex.: 3, 12, 40-45, 300" autocomplete="off"></label>
       <p class="bk-p wide bk-sub" data-for="nums">Separe por vírgula. Use hífen para uma sequência: 40-45 pega do 40 ao 45.</p>
       <p class="bk-p wide bk-sub" data-for="busca" id="bk-qinfo"></p>
-      <p class="bk-p wide bk-sub" data-for="fav">Toque na estrela ☆ ao lado de um haicai para marcá-lo como favorito.</p>
+      <p class="bk-p wide bk-sub" data-for="fav">Toque na estrela de um haicai para marcá-lo como favorito.</p>
       <label class="field">Título<input id="bk-title"></label>
       <label class="field">Autor<input id="bk-author" placeholder="seu nome" autocomplete="name"></label>
       <div class="field">Tamanho da página<div class="chips" id="bk-paper"><button type="button" class="chip" data-v="A4">A4 · folha</button><button type="button" class="chip" data-v="A5">A5 · livro</button></div></div>
@@ -387,9 +455,9 @@ footer{padding-block:40px 60px;color:var(--ink-3);font-size:12px;text-align:cent
     </div>
     <datalist id="bk-kigos"></datalist>
     <div class="composer-foot">
-      <strong id="bk-count" style="font-size:13px"></strong>
+      <strong id="bk-count"></strong>
       <div class="row">
-        <button class="btn" id="bk-close" type="button">Cancelar</button>
+        <button class="btn ghost" id="bk-close" type="button">Cancelar</button>
         <button class="btn primary" id="bk-make" type="button">Ver livreto</button>
       </div>
     </div>
@@ -403,41 +471,25 @@ footer{padding-block:40px 60px;color:var(--ink-3);font-size:12px;text-align:cent
       <label class="field wide">Assinatura<input type="text" id="sc-sig" placeholder="seu nome ou @perfil" autocomplete="off" maxlength="40"></label>
     </div>
     <div class="composer-foot">
-      <span></span>
+      <button class="btn ghost" id="sc-close" type="button">Voltar</button>
       <div class="row">
-        <button class="btn" id="sc-close" type="button">Voltar</button>
-        <button class="btn" id="sc-save" type="button">Salvar imagem</button>
+        <button class="btn" id="sc-save" type="button">Salvar</button>
         <button class="btn primary" id="sc-share" type="button">Compartilhar</button>
       </div>
     </div>
   </section>
   <div id="list"><p class="empty">Abrindo o caderno…</p></div>
-  <footer>Caderno de Haicais · 俳句帳</footer>
+  <footer id="foot">Caderno de Haicais · 俳句帳</footer>
 </main>
 <div class="toast" id="toast" hidden></div>
-<div id="menu" hidden>
-  <div class="menu-back" data-go="close"></div>
-  <nav class="menu-panel" aria-label="Menu">
-    <div class="menu-head"><strong>Haicais<span lang="ja">俳句帳</span></strong><button class="btn ghost icon" data-go="close" type="button" aria-label="Fechar menu">✕</button></div>
-    <button class="mi primary" data-go="write" type="button">+ Escrever haicai</button>
-    <p class="mh">Caderno</p>
-    <button class="mi" data-go="tab:todos" type="button"><span class="ic">≡</span>Todos<span class="mc" data-mc="todos"></span></button>
-    <button class="mi" data-go="tab:primavera" type="button"><span class="ic"><span class="dot c-primavera"></span></span>Primavera<span class="mc" data-mc="primavera"></span></button>
-    <button class="mi" data-go="tab:verao" type="button"><span class="ic"><span class="dot c-verao"></span></span>Verão<span class="mc" data-mc="verao"></span></button>
-    <button class="mi" data-go="tab:outono" type="button"><span class="ic"><span class="dot c-outono"></span></span>Outono<span class="mc" data-mc="outono"></span></button>
-    <button class="mi" data-go="tab:inverno" type="button"><span class="ic"><span class="dot c-inverno"></span></span>Inverno<span class="mc" data-mc="inverno"></span></button>
-    <button class="mi" data-go="fav" type="button"><span class="ic" style="color:#c9932b">★</span>Favoritos<span class="mc" data-mc="fav"></span></button>
-    <button class="mi" data-go="random" type="button"><span class="ic">⁂</span>Um haicai ao acaso</button>
-    <p class="mh">Ferramentas</p>
-    <button class="mi" data-go="kigos" type="button"><span class="ic kj" lang="ja">季</span>Saijiki · kigos<span class="mc" data-mc="kigos"></span></button>
-    <button class="mi" data-go="book" type="button"><span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 5.5c2.8-1.3 6.2-1.3 10 .8 3.8-2.1 7.2-2.1 10-.8v13c-2.8-1.3-6.2-1.3-10 .8-3.8-2.1-7.2-2.1-10-.8z"/><path d="M12 6.3v13"/></svg></span>Fazer livreto</button>
-    <p class="mh">Nuvem e cópias</p>
-    <button class="mi" data-go="cloud" type="button"><span class="ic"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 18.5h10.5a4 4 0 0 0 .6-7.95A6 6 0 0 0 6.6 9.1 4.75 4.75 0 0 0 7 18.5z"/></svg></span>Nuvem e backup<span class="mc" data-mc="sync"></span></button>
-    <button class="mi" data-go="txt" type="button"><span class="ic">↓</span>Baixar em texto (.txt)</button>
-    <button class="mi" data-go="json" type="button"><span class="ic">↓</span>Baixar backup completo</button>
-    <button class="mi" data-go="import" type="button"><span class="ic">↑</span>Importar backup…</button>
-  </nav>
-</div>
+
+<nav class="tabbar" aria-label="Navegação">
+  <button class="tbb" id="btn-home" type="button" data-nav="haicais" aria-label="Caderno"><svg class="i" viewBox="0 0 24 24"><path d="M6 3h11a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H6z"/><path d="M6 3v18M10 8h5M10 12h5"/></svg></button>
+  <button class="tbb" id="btn-kigos" type="button" data-nav="kigos" aria-label="Saijiki, dicionário de kigos"><span class="kj" lang="ja">季</span></button>
+  <button class="tbb plus" id="btn-write" type="button" aria-label="Escrever haicai"><svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
+  <button class="tbb" id="btn-re" type="button" data-nav="reencontro" aria-label="Reencontrar um haicai"><svg class="i" viewBox="0 0 24 24"><path d="M4 4v6h6M20 20v-6h-6M5 15a7 7 0 0 0 12.5 2.5M19 9A7 7 0 0 0 6.5 6.5"/></svg></button>
+  <button class="tbb" id="btn-cloud" type="button" data-nav="voce" aria-label="Você: backup, livreto e cópias"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="8.5" r="3.8"/><path d="M4.5 20c1.2-3.8 4-5.5 7.5-5.5s6.3 1.7 7.5 5.5"/></svg></button>
+</nav>
 <div id="bookview" hidden>
   <div class="bk-bar no-print">
     <button class="btn" id="bk-back" type="button">← Voltar</button>
@@ -457,6 +509,17 @@ const SEASONS=[["primavera","Primavera"],["verao","Verão"],["outono","Outono"],
 const SLABEL=Object.fromEntries(SEASONS);
 const MONTHS=["janeiro","fevereiro","março","abril","maio","junho","julho","agosto","setembro","outubro","novembro","dezembro"];
 const MSHORT=["jan","fev","mar","abr","mai","jun","jul","ago","set","out","nov","dez"];
+const KANJI={primavera:"春",verao:"夏",outono:"秋",inverno:"冬"};
+const SMON={primavera:"set · out · nov",verao:"dez · jan · fev",outono:"mar · abr · mai",inverno:"jun · jul · ago"};
+const svgI=d=>`<svg class="i" viewBox="0 0 24 24" aria-hidden="true">${d}</svg>`;
+const ICON={
+  share:svgI('<path d="M12 3v12"/><path d="M8 7l4-4 4 4"/><path d="M6 11H5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-8a1 1 0 0 0-1-1h-1"/>'),
+  edit:svgI('<path d="M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16z"/><path d="m13.5 6.5 4 4"/>'),
+  trash:svgI('<path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3"/>'),
+  star:svgI('<path d="m12 3.5 2.6 5.3 5.9.9-4.3 4.1 1 5.8-5.2-2.7-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z"/>'),
+  arrow:svgI('<path d="M5 12h14M13 6l6 6-6 6"/>'),
+  back:svgI('<path d="m15 6-6 6 6 6"/>')
+};
 const $=s=>document.querySelector(s);
 const store={get(k,d){try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
 
@@ -523,12 +586,11 @@ function all(){
 function renderTabs(items){
   const counts={todos:items.length};SEASONS.forEach(([k])=>counts[k]=items.filter(h=>h.season===k).length);
   $("#tabs").innerHTML=[["todos","Todos"],...SEASONS].map(([k,l])=>
-    `<button class="tab ${k!=="todos"?"c-"+k:""}" role="tab" data-tab="${k}" aria-selected="${st.tab===k}" style="${k!=="todos"?"--tab-c:var(--s-"+k+")":""}">${k!=="todos"?'<span class="dot"></span>':""}${l}<span class="c">${counts[k]}</span></button>`).join("")
-;
+    `<button class="tab" role="tab" data-tab="${k}" aria-selected="${st.tab===k}">${k!=="todos"?`<span class="kj" lang="ja">${KANJI[k]}</span>`:""}${l}<span class="c">${counts[k]}</span></button>`).join("");
 }
 
 /* ---------- dicionário de kigos ---------- */
-const KCAT={T:"Tempo",FA:"Fenômeno atmosférico",GEO:"Geografia",FAU:"Fauna",FL:"Flora",V:"Vivenciais"};
+const KCAT={T:"Tempo",FA:"Fenômenos",GEO:"Geografia",FAU:"Fauna",FL:"Flora",V:"Vivências"};
 const KSEA={P:"primavera",V:"verao",O:"outono",I:"inverno"};
 let kigos=[], kigoCache=null, kigoCacheKey="";
 function kSeason(c){return KSEA[c[0]]}
@@ -544,23 +606,33 @@ function kigoCounts(items){
 function renderKigos(items){
   const q=foldStr(st.q.trim());
   const counts=kigoCounts(items);
-  let list=kigos.filter(k=>(st.ks==="todas"||kSeason(k.c)===st.ks)&&(st.kc==="todas"||kCat(k.c)===st.kc));
+  const all4=st.ks==="todas";
+  /* sem estação escolhida e sem busca: as quatro estações */
+  if(all4&&!q){
+    const n={};kigos.forEach(k=>{const s=kSeason(k.c);n[s]=(n[s]||0)+1});
+    $("#count").textContent="";
+    $("#list").innerHTML=`<p class="kigo-intro">Saijiki brasileiro com ${kigos.length} termos de estação. Escolha uma estação para ver os kigos.</p>
+      <div class="sgrid">${SEASONS.map(([k,l])=>`<button type="button" class="sg c-${k}" data-act="kf" data-g="ks" data-v="${k}"><b>${l}</b><small>${SMON[k]}</small><span class="n">${n[k]||0} kigos</span><span class="k" lang="ja" aria-hidden="true">${KANJI[k]}</span></button>`).join("")}</div>`;
+    return;
+  }
+  const inSeason=kigos.filter(k=>all4||kSeason(k.c)===st.ks);
+  let list=inSeason.filter(k=>st.kc==="todas"||kCat(k.c)===st.kc);
   if(q) list=list.filter(k=>foldStr(k.t+" "+(k.obs||"")).includes(q));
   if(st.kmine) list=list.filter(k=>counts.has(k.t));
-  const chip=(grp,v,l,cls="")=>`<button type="button" class="chip ${cls}" data-act="kf" data-g="${grp}" data-v="${v}" aria-pressed="${st[grp]===v}">${cls?'<span class="dot"></span>':""}${l}</button>`;
-  let html=`<div class="kigo-head">
-    <p class="kigo-intro">Saijiki brasileiro com ${kigos.length} termos de estação, separados por estação e categoria. Toque num kigo para ver os seus haicais com ele.</p>
-    <div class="chips">${chip("ks","todas","Todas")}${SEASONS.map(([k,l])=>chip("ks",k,l,"c-"+k)).join("")}</div>
-    <div class="chips">${chip("kc","todas","Todos os temas")}${Object.entries(KCAT).map(([k,l])=>chip("kc",k,l)).join("")}</div>
-    <label class="mine"><input type="checkbox" id="k-mine" ${st.kmine?"checked":""}> Só os que aparecem nos meus haicais</label>
-  </div>`;
+  const cn={};inSeason.forEach(k=>{const c=kCat(k.c);cn[c]=(cn[c]||0)+1});
+  const chip=(v,l,n)=>`<button type="button" class="chip" data-act="kf" data-g="kc" data-v="${v}" aria-pressed="${st.kc===v}">${l}${n!=null?`<span class="n">${n}</span>`:""}</button>`;
+  let html=all4
+    ?`<p class="kigo-intro">Buscando em todas as estações.</p>`
+    :`<div class="khead c-${st.ks}"><span class="kj" lang="ja">${KANJI[st.ks]}</span><div><b>${SLABEL[st.ks]}</b><small>${SMON[st.ks]} · ${inSeason.length} kigos</small></div><button type="button" class="ibtn" data-act="kf" data-g="ks" data-v="todas" aria-label="Voltar às quatro estações">${ICON.back}</button></div>`;
+  html+=`<div class="chips kcats" role="group" aria-label="Categoria">${chip("todas","Todos")}${Object.entries(KCAT).filter(([k])=>cn[k]).map(([k,l])=>chip(k,l,cn[k])).join("")}</div>
+    <label class="mine"><input type="checkbox" id="k-mine" ${st.kmine?"checked":""}> Só os que aparecem nos meus haicais</label>`;
   $("#count").textContent=list.length+" kigo"+(list.length===1?"":"s")+(q?" encontrados":"");
   if(!list.length){$("#list").innerHTML=html+`<p class="empty">Nenhum kigo${q?" com “"+esc(st.q.trim())+"”":""} nesta seleção.</p>`;return}
   let lastS=null,lastC=null,open=false;
   for(const k of list){
     const s=kSeason(k.c),c=kCat(k.c);
-    if(s!==lastS){if(open)html+="</div>";open=false;html+=`<h3 class="band c-${s}">${SLABEL[s]}<small>${{primavera:"setembro · outubro · novembro",verao:"dezembro · janeiro · fevereiro",outono:"março · abril · maio",inverno:"junho · julho · agosto"}[s]}</small></h3>`;lastS=s;lastC=null}
-    if(c!==lastC){if(open)html+="</div>";html+=`<div class="month">${KCAT[c]}</div><div class="kigo-list">`;open=true;lastC=c}
+    if(all4&&s!==lastS){if(open)html+="</div>";open=false;html+=`<h3 class="kgrp s">${SLABEL[s]} <span class="tag c-${s}"><i lang="ja">${KANJI[s]}</i></span></h3>`;lastS=s;lastC=null}
+    if(c!==lastC){if(open)html+="</div>";html+=`<div class="kgrp">${KCAT[c]}</div><div class="kigo-list">`;open=true;lastC=c}
     const n=counts.get(k.t);
     html+=`<button type="button" class="kigo c-${s}" data-act="kigo" data-term="${esc(k.t)}"${k.obs?` title="${esc(k.obs)}"`:""}>${hl(k.t,q?[q]:[])}${k.obs?` <span class="kobs">(${esc(k.obs)})</span>`:""}${n?`<span class="kn">${n}</span>`:""}</button>`;
   }
@@ -574,23 +646,28 @@ function findKigos(text){
   return found.filter((k,i)=>!found.slice(0,i).some(o=>foldStr(o.t).includes(foldStr(k.t)))).slice(0,4);
 }
 function card(h,terms,opts={}){
-  const acts=canWrite&&!opts.noActs?(confirmId===h.id
-    ?`<span class="acts" style="opacity:1"><span class="confirm">Apagar este haicai?<button class="btn ghost danger" data-act="del-yes" data-id="${h.id}">Apagar</button><button class="btn ghost" data-act="del-no">Manter</button></span></span>`
-    :`<span class="acts"><button class="btn ghost ic-share" data-act="share" data-id="${h.id}" aria-label="Fazer cartão para compartilhar" title="Cartão para compartilhar"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="M8 7l4-4 4 4"/><path d="M6 11H5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-8a1 1 0 0 0-1-1h-1"/></svg></button><button class="btn ghost" data-act="edit" data-id="${h.id}">Editar</button><button class="btn ghost" data-act="del" data-id="${h.id}">Apagar</button></span>`):"";
-  return `<article class="hk" data-id="${h.id}">
-    <div class="meta"><span class="num">${h.n!=null?esc(h.n):"—"}</span>${h.season?`<span class="dot c-${h.season}" title="${SLABEL[h.season]}"></span>`:""}<time>${fmtDate(h.date)}</time>${h.kigo?`<span class="kg" title="Kigo deste haicai">kigo: ${hl(h.kigo,terms)}</span>`:""}${acts}${opts.noActs?(h.fav?'<span class="star on" aria-label="favorito">★</span>':""):`<button type="button" class="star${h.fav?" on":""}" data-act="fav" data-id="${h.id}" aria-pressed="${!!h.fav}" aria-label="${h.fav?"Tirar dos favoritos":"Marcar como favorito"}">${h.fav?"★":"☆"}</button>`}</div>
+  const s=h.season;
+  const star=`<button type="button" class="ab star${h.fav?" on":""}" data-act="fav" data-id="${h.id}" aria-pressed="${!!h.fav}" aria-label="${h.fav?"Tirar dos favoritos":"Marcar como favorito"}">${ICON.star}</button>`;
+  let acts="";
+  if(canWrite&&!opts.noActs) acts=confirmId===h.id
+    ?`<span class="confirm">Apagar?<button class="btn ghost danger" data-act="del-yes" data-id="${h.id}">Apagar</button><button class="btn ghost" data-act="del-no">Manter</button></span>`
+    :`<span class="acts">${star}<button class="ab" data-act="share" data-id="${h.id}" aria-label="Fazer cartão para compartilhar" title="Cartão para compartilhar">${ICON.share}</button><button class="ab" data-act="edit" data-id="${h.id}" aria-label="Editar" title="Editar">${ICON.edit}</button><button class="ab" data-act="del" data-id="${h.id}" aria-label="Apagar" title="Apagar">${ICON.trash}</button></span>`;
+  return `<article class="hk${s?" c-"+s:""}" data-id="${h.id}">
     ${h.note?`<p class="note">${hl(h.note,terms)}</p>`:""}
     ${h.jp?`<p class="jp" lang="ja">${hl(h.jp,terms)}</p>`:""}
     ${h.romaji?`<p class="ro">${hl(h.romaji,terms)}</p>`:""}
     ${h.text?`<p class="poem">${hl(h.text,terms)}</p>`:""}
     ${h.place?`<p class="place">${hl(h.place,terms)}</p>`:""}
+    <div class="meta"><span class="info"><span class="tag">${s?`<i lang="ja" title="${SLABEL[s]}">${KANJI[s]}</i>`:""}<time>${fmtDate(h.date)}</time></span>${h.n!=null?`<span class="num">nº ${esc(h.n)}</span>`:""}${h.kigo?`<span class="kg" title="Kigo deste haicai">${hl(h.kigo,terms)}</span>`:""}</span>${acts}</div>
   </article>`;
 }
 function render(){
   const items=all();
   renderTabs(items);
+  if(view==="haicais"){$("#featured").hidden=!!st.q;if(st.q){document.body.classList.add("searching");$("#btn-search").setAttribute("aria-pressed","true")}}
   const years=items.filter(h=>h.date).map(h=>+h.date.slice(0,4));
-  $("#sub").textContent=items.length+" haicais"+(years.length?" · "+Math.min(...years)+"–"+Math.max(...years):"");
+  $("#sub").textContent=items.length?"Caderno com haicais"+(years.length?" de "+Math.min(...years)+" a "+Math.max(...years):"")+".":"Caderno ainda vazio neste aparelho.";
+  renderVoce(items);
   $("#btn-order").hidden=st.tab==="kigos";
   $("#q").placeholder=st.tab==="kigos"?"Buscar kigo: lua, ipê, cigarra, geada…":"Buscar palavras, datas, kigo, número…";
   if(st.tab==="kigos"){renderKigos(items);return}
@@ -606,7 +683,7 @@ function render(){
   let html="",lastS=null,lastM=null;
   for(const h of list){
     const sk=seasonKey(h,st.tab);
-    if(sk!==lastS){const[t,sm]=seasonTitle(sk);html+=`<h3 class="band ${h.season?"c-"+h.season:""}">${t}${sm?` <small>${sm}</small>`:""}</h3>`;lastS=sk;lastM=null}
+    if(sk!==lastS){const[t,sm]=seasonTitle(sk);html+=`<h3 class="band ${h.season?"c-"+h.season:""}">${h.season?`<span class="kj" lang="ja">${KANJI[h.season]}</span>`:""}${t}${sm?` <small>${sm}</small>`:""}</h3>`;lastS=sk;lastM=null}
     const mk=h.date?h.date.slice(0,7):null;
     if(mk&&mk!==lastM){html+=`<div class="month">${monthTitle(h.date)}</div>`}
     lastM=mk;
@@ -614,22 +691,49 @@ function render(){
   }
   $("#list").innerHTML=html;
 }
+/* reencontro: na capa, um haicai do mesmo dia em outro ano; se não houver, um do caderno escolhido para o dia */
+function sameDay(items){const t=todayISO().slice(5),y=todayISO().slice(0,4);return items.filter(h=>h.date&&h.date.slice(5)===t&&h.date.slice(0,4)!==y&&(h.text||h.jp))}
+function dailyPick(items){
+  const same=sameDay(items);
+  if(same.length){const h=same[same.length-1],n=+todayISO().slice(0,4)-+h.date.slice(0,4);return {h,label:"Neste dia · há "+n+(n===1?" ano":" anos")}}
+  const pool=items.filter(h=>h.text||h.jp); if(!pool.length) return null;
+  let x=0;for(const c of todayISO())x=(x*31+c.charCodeAt(0))>>>0;
+  return {h:pool[x%pool.length],label:"Reencontro de hoje"};
+}
+function featCard(h,label,big){
+  const s=h.season;
+  const m=[h.date?fmtDate(h.date):"sem data",s?SLABEL[s]:"",h.n!=null?"nº "+h.n:""].filter(Boolean).join(" · ");
+  const right=big
+    ?`<span class="acts" style="display:flex"><button type="button" class="ab star${h.fav?" on":""}" data-act="fav" data-id="${h.id}" aria-pressed="${!!h.fav}" aria-label="${h.fav?"Tirar dos favoritos":"Marcar como favorito"}">${ICON.star}</button><button class="ab" data-act="share" data-id="${h.id}" aria-label="Fazer cartão para compartilhar">${ICON.share}</button>${canWrite?`<button class="ab" data-act="edit" data-id="${h.id}" aria-label="Editar">${ICON.edit}</button>`:""}</span>`
+    :`<button type="button" class="go" data-act="open-re" data-id="${h.id}" aria-label="Abrir no Reencontrar">${ICON.arrow}</button>`;
+  return `<div class="feat${big?" big":""}${s?" c-"+s:""}"><div class="lb">${esc(label)}</div>${s?`<span class="seal" lang="ja" aria-hidden="true">${KANJI[s]}</span>`:""}
+    ${h.note&&big?`<p class="note" style="margin-top:26px">${esc(h.note)}</p>`:""}${h.jp?`<p class="jp" lang="ja">${esc(h.jp)}</p>`:""}${h.text?`<p class="poem">${esc(h.text)}</p>`:""}
+    ${big&&h.kigo?`<span class="kg">kigo: ${esc(h.kigo)}</span>`:""}
+    <div class="ft"><span class="m">${esc(m)}</span>${right}</div></div>`;
+}
 function renderFeatured(){
-  const box=$("#featured"); const items=all();
-  if(featured){
-    const h=items.find(x=>x.id===featured);
-    if(h){box.innerHTML=`<div class="feature"><div class="lbl">Ao acaso<span><button class="btn ghost" data-act="rand">Outro</button><button class="btn ghost" data-act="close-feat" aria-label="Fechar">✕</button></span></div>${card(h,[],{noActs:true})}</div>`;return}
-  }
-  const t=todayISO().slice(5); const y=todayISO().slice(0,4);
-  const same=items.filter(h=>h.date&&h.date.slice(5)===t&&h.date.slice(0,4)!==y);
-  if(same.length&&!store.get("hk.hideday-"+todayISO(),false)){
-    box.innerHTML=`<div class="feature"><div class="lbl">Neste dia, em outros anos<button class="btn ghost" data-act="hide-day" aria-label="Fechar">✕</button></div>${same.slice(-3).map(h=>card(h,[],{noActs:true})).join("")}</div>`;
-  } else box.innerHTML="";
+  const box=$("#featured"),p=dailyPick(all());
+  box.innerHTML=p?featCard(p.h,p.label,false):"";
+}
+function renderRe(){
+  if(view!=="reencontro")return;
+  const items=all(),pool=items.filter(h=>h.text||h.jp);
+  let h=pool.find(x=>x.id===featured);
+  if(!h&&pool.length){h=pool[Math.floor(Math.random()*pool.length)];featured=h.id}
+  $("#re-card").innerHTML=h?featCard(h,h.date?"Escrito em "+h.date.slice(0,4):"Do seu caderno",true):`<p class="empty">Quando houver haicais no caderno, eles reaparecem aqui.</p>`;
+  const same=sameDay(items).filter(x=>x.id!==featured);
+  $("#re-day").innerHTML=same.length?`<h3 class="sec-t">Neste dia, em outros anos</h3>${same.slice(-5).reverse().map(x=>card(x,[])).join("")}`:"";
+}
+function renderVoce(items){
+  if(!$("#vstats"))return;
+  const fav=items.filter(h=>h.fav).length, ku=kigos.length?kigoCounts(items).size:0;
+  $("#vstats").innerHTML=`<div><b>${items.length}</b><span>haicais</span></div><div><b>${ku}</b><span>kigos usados</span></div><div><b>${fav}</b><span>favoritos</span></div>`;
+  $("#v-fav").textContent=fav||"";
 }
 
 /* ---------- compositor ---------- */
 function renderSeasonChips(sel,kg){
-  $("#f-season").innerHTML=SEASONS.map(([k,l])=>`<button type="button" class="chip c-${k}" data-season="${k}" aria-pressed="${sel===k}"><span class="dot"></span>${l}</button>`).join("");
+  $("#f-season").innerHTML=SEASONS.map(([k,l])=>`<button type="button" class="sb c-${k}" data-season="${k}" aria-pressed="${sel===k}"><i lang="ja">${KANJI[k]}</i>${l}</button>`).join("");
   $("#season-auto").textContent=seasonManual?"":kg?`(sugerida pelo kigo “${kg.t.toLocaleLowerCase("pt-BR")}”)`:"(automática pela data)";
 }
 /* kigo no compositor: aponta o kigo; com mais de um, a pessoa escolhe; sem kigo, nada */
@@ -651,7 +755,7 @@ function updateKigo(){
   else{
     box.hidden=false;
     box.innerHTML=`<span class="kq">${kg.length>1?"Achei mais de um kigo. Qual é o deste haicai?":"Kigo"}</span><div class="chips" role="group" aria-label="Kigo">${kg.map(k=>{const s=kSeason(k.c),f=foldStr(k.t);
-      return `<button type="button" class="chip c-${s}" data-kigo="${esc(f)}" aria-pressed="${f===pf}"><span class="dot"></span>${esc(k.t.toLocaleLowerCase("pt-BR"))} · ${SLABEL[s]}</button>`}).join("")}</div>`;
+      return `<button type="button" class="chip kgc c-${s}" data-kigo="${esc(f)}" aria-pressed="${f===pf}"><span class="kj" lang="ja">${KANJI[s]}</span>${esc(k.t.toLocaleLowerCase("pt-BR"))} · ${SLABEL[s].toLocaleLowerCase("pt-BR")}</button>`}).join("")}</div>`;
   }
   applySeasonAuto();
 }
@@ -736,10 +840,11 @@ function scanLine(line){
 function updateSyl(){
   const lines=$("#f-text").value.split("\n").filter(l=>l.trim());
   scFix=(C.getDoc&&C.getDoc("__silabas")||{}).map||{};
-  const rows=lines.map(l=>{const r=/[\u3040-\u30ff\u4e00-\u9fff]/.test(l)?null:scanLine(l);
+  const want=lines.length===3?[5,7,5]:null;
+  const rows=lines.map((l,li)=>{const r=/[\u3040-\u30ff\u4e00-\u9fff]/.test(l)?null:scanLine(l);
     if(!r) return "";
-    const n=r.min===r.max?r.min:r.min+"–"+r.max;
-    return `<div class="scan-row"><span class="scan-n${r.min===r.max?"":" rng"}" title="${r.min===r.max?"":"depende de juntar ou não as vogais marcadas"}">${n}</span><span class="scan-s">${r.units.map((u,i)=>`<span class="u${i>r.su?" post":i===r.su?" ton":""}">${u.parts.join("")}</span>`).join('<i>/</i>')}</span></div>`}).filter(Boolean);
+    const n=r.min===r.max?r.min:r.min+"–"+r.max, ok=want&&r.min<=want[li]&&want[li]<=r.max;
+    return `<div class="scan-row"><span class="scan-n${r.min===r.max?"":" rng"}${ok?" ok":""}" title="${r.min===r.max?"":"depende de juntar ou não as vogais marcadas"}">${n}</span><span class="scan-s">${r.units.map((u,i)=>`<span class="u${i>r.su?" post":i===r.su?" ton":""}">${u.parts.join("")}</span>`).join('<i>/</i>')}</span></div>`}).filter(Boolean);
   $("#syl").innerHTML=rows.length?`<div class="scan-head">Escansão <span class="hint">sílabas poéticas até a última tônica · ‿ junção de vogais · <i class="opt">‿</i> junção opcional · toque numa palavra para corrigir a divisão</span></div>${rows.join("")}`:"";
   updateKigo();
 }
@@ -822,7 +927,7 @@ $("#composer").addEventListener("keydown",e=>{if(e.key==="Enter"&&(e.metaKey||e.
 $("#f-date").addEventListener("change",applySeasonAuto);
 $("#kigo-row").addEventListener("click",e=>{const b=e.target.closest("[data-kigo]");if(!b)return;const f=b.dataset.kigo,cur=pickedKigo();if(cur&&foldStr(cur.t)===f){kigoOff.add(f);kigoPick=null}else{kigoPick=f;kigoOff.delete(f)}updateKigo()});
 $("#f-season").addEventListener("click",e=>{const b=e.target.closest("[data-season]");if(!b)return;seasonManual=true;renderSeasonChips(b.dataset.season)});
-function randomPick(){if(view!=="haicais")setView("haicais");const items=all().filter(h=>h.text||h.jp);featured=items[Math.floor(Math.random()*items.length)]?.id;renderFeatured();$("#featured").scrollIntoView({behavior:"smooth",block:"nearest"})}
+function randomPick(){const items=all().filter(h=>(h.text||h.jp)&&h.id!==featured);featured=items[Math.floor(Math.random()*items.length)]?.id||featured;if(view!=="reencontro")setView("reencontro");else{renderRe();window.scrollTo({top:0,behavior:"smooth"})}}
 
 document.addEventListener("click",e=>{
   const b=e.target.closest("[data-act]");if(!b)return;const a=b.dataset.act,id=b.dataset.id;
@@ -833,9 +938,8 @@ document.addEventListener("click",e=>{
   else if(a==="del-no"){confirmId=null;render()}
   else if(a==="del-yes"){del(id)}
   else if(a==="rand"){randomPick()}
-  else if(a==="close-feat"){featured=null;renderFeatured()}
-  else if(a==="hide-day"){store.set("hk.hideday-"+todayISO(),true);renderFeatured()}
-  else if(a==="kf"){st[b.dataset.g]=b.dataset.v;render()}
+  else if(a==="open-re"){featured=id;setView("reencontro")}
+  else if(a==="kf"){st[b.dataset.g]=b.dataset.v;if(b.dataset.g==="ks"){st.kc="todas";st.q="";$("#q").value="";$("#q-clear").hidden=true}render();if(b.dataset.g==="ks")window.scrollTo(0,0)}
   else if(a==="kigo"){st.q=b.dataset.term;$("#q").value=st.q;$("#q-clear").hidden=false;st.tab="todos";store.set("hk.tab","todos");setView("haicais");render()}
 });
 document.addEventListener("change",e=>{if(e.target.id==="k-mine"){st.kmine=e.target.checked;render()}});
@@ -1044,7 +1148,7 @@ function showBook(){
   $("#bookview").hidden=false; $("#bookview").scrollTop=0; document.documentElement.style.overflow="hidden";
 }
 function closeBook(){$("#bookview").hidden=true;document.documentElement.style.overflow=""}
-$("#bk-close").addEventListener("click",goHome);
+$("#bk-close").addEventListener("click",()=>setView("voce"));
 $("#bookform").addEventListener("click",e=>{
   const c=e.target.closest(".chip");if(!c)return;
   const g=c.parentElement.id; if(g==="bk-mode"){bk.mode=c.dataset.v;bkTitleEdited=false}else if(g==="bk-paper")bk.paper=c.dataset.v;else if(g==="bk-order")bk.order=c.dataset.v;
@@ -1091,8 +1195,8 @@ async function scDraw(){
   const h=scHaiku();if(!h)return;const my=++scSeq;
   const [W,H]=SC_FMT[sc.fmt]; const cv=$("#sc-canvas"); cv.width=W; cv.height=H; const ctx=cv.getContext("2d");
   const poem=(h.text||h.jp||"").replace(/\s+$/,""); const isJp=!h.text&&!!h.jp;
-  const POEM='"Shippori Mincho","Hiragino Mincho ProN","Yu Mincho",Georgia,serif', UI='"Zen Kaku Gothic New","Hiragino Sans","Helvetica Neue",Arial,sans-serif';
-  try{await Promise.all([document.fonts.load('400 60px "Shippori Mincho"',poem+"春夏秋冬"),document.fonts.load('400 30px "Zen Kaku Gothic New"',"0123456789 abcdefghijklmnopqrstuvwxyzãçéêíóôõú·—@")])}catch(e){}
+  const POEM='"Shippori Mincho","Hiragino Mincho ProN","Yu Mincho",Georgia,serif', UI='"Inter Tight","Helvetica Neue","Hiragino Sans",Arial,sans-serif';
+  try{await Promise.all([document.fonts.load('400 60px "Shippori Mincho"',poem+"春夏秋冬"),document.fonts.load('600 30px "Inter Tight"',"0123456789 abcdefghijklmnopqrstuvwxyzãçéêíóôõú·—@")])}catch(e){}
   if(my!==scSeq)return;
   const sea=h.season||null, seaCol=sea?SC_SEA[sea]:"#2f4b78";
   const pal=sc.bg==="noite"?{bg:"#161a19",ink:"#ecebe4",soft:"#9aa29d",acc:sea?{primavera:"#e08aae",verao:"#e3a552",outono:"#dd8462",inverno:"#8fb2cf"}[sea]:"#9db4dc"}
@@ -1120,7 +1224,7 @@ async function scDraw(){
   if(icon){ctx.save();const r=isz*0.22,ix=M,iy=fy-isz*0.78;ctx.beginPath();
     ctx.moveTo(ix+r,iy);ctx.arcTo(ix+isz,iy,ix+isz,iy+isz,r);ctx.arcTo(ix+isz,iy+isz,ix,iy+isz,r);ctx.arcTo(ix,iy+isz,ix,iy,r);ctx.arcTo(ix,iy,ix+isz,iy,r);ctx.closePath();
     ctx.clip();ctx.drawImage(icon,ix,iy,isz,isz);ctx.restore()}
-  ctx.textBaseline="alphabetic";ctx.textAlign="left";ctx.font=`400 ${Math.round(ms*0.92)}px ${UI}`;ctx.fillStyle=pal.soft;
+  ctx.textBaseline="alphabetic";ctx.textAlign="left";ctx.font=`600 ${Math.round(ms*0.92)}px ${UI}`;ctx.fillStyle=pal.soft;
   ctx.fillText("Caderno de Haicais",M+(icon?isz+ms*0.6:0),fy-isz*0.78+isz*0.5+ms*0.32);
   if(sig){ctx.textAlign="right";ctx.fillStyle=pal.ink;ctx.font=`400 ${Math.round(ms*1.15)}px ${POEM}`;ctx.fillText("— "+sig,W-M,fy-isz*0.78+isz*0.5+ms*0.4)}
   scBlob=null; cv.toBlob(b=>{if(my===scSeq)scBlob=b},"image/png");
@@ -1143,52 +1247,50 @@ $("#sc-share").addEventListener("click",scShare);
 
 /* ---------- páginas ---------- */
 function setView(v){
+  if(v==="nuvem")v="voce";
   view=v; document.body.dataset.view=v;
   const show=(sel,on)=>{const el=$(sel);if(el)el.hidden=!on};
-  show("#composer",v==="escrever"); show("#cloud",v==="nuvem"); show("#bookform",v==="livreto"); show("#sharecard",v==="cartao");
-  show("#featured",v==="haicais"); show(".bar",v==="haicais"||v==="kigos"); show("#tabs",v==="haicais");
-  show(".listinfo",v==="haicais"); show("#list",v==="haicais"||v==="kigos"); show("#kigos-head",v==="kigos");
+  show("#composer",v==="escrever"); show("#voce",v==="voce"); show("#bookform",v==="livreto"); show("#sharecard",v==="cartao"); show("#reencontro",v==="reencontro");
+  show("#featured",v==="haicais"&&!st.q); show(".bar",v==="haicais"||v==="kigos"); show("#tabs",v==="haicais");
+  show(".listinfo",v==="haicais"); show("#list",v==="haicais"||v==="kigos"); show("header.top .hd",v!=="escrever"); show(".top-actions",v==="haicais");
+  const H={haicais:["Caderno",()=>{const t=todayISO();return (SLABEL[seasonOf(t)]||"")+" · "+(+t.slice(8))+" "+MSHORT[+t.slice(5,7)-1]}],
+    kigos:["Saijiki","Dicionário de kigos"],reencontro:["Reencontrar","Um haicai ao acaso"],voce:["Você","Backup, livreto e cópias"],
+    livreto:["Livreto","Para imprimir ou salvar em PDF"],cartao:["Cartão","Para compartilhar nas redes"]}[v];
+  if(H){$("#h1").textContent=H[0];$("#eyebrow").textContent=typeof H[1]==="function"?H[1]():H[1]}
   if(v!=="escrever")editingId=null;
   if(v==="kigos"){if(st.tab!=="kigos"){st.tab="kigos";render()}}
   else if(st.tab==="kigos"){st.tab=store.get("hk.lasttab","todos");if(st.tab==="kigos")st.tab="todos";render()}
-  const cur={haicais:"#btn-home",kigos:"#btn-kigos",livreto:"#btn-book-top",nuvem:"#btn-cloud",escrever:"#btn-write"}[v];
-  document.querySelectorAll(".top-actions .btn").forEach(b=>b.removeAttribute("aria-current"));
+  const cur={haicais:"#btn-home",kigos:"#btn-kigos",reencontro:"#btn-re",voce:"#btn-cloud"}[v];
+  document.querySelectorAll(".tabbar .tbb").forEach(b=>b.removeAttribute("aria-current"));
   if(cur)$(cur).setAttribute("aria-current","page");
+  if(v==="voce")renderCloud();
+  if(v==="reencontro")renderRe();
   window.scrollTo(0,0);
 }
 function goHome(){setView("haicais")}
 
-/* ---------- menu e atalhos do topo ---------- */
-function goTab(t){if(t==="kigos"){setView("kigos");return}st.tab=t;store.set("hk.tab",t);store.set("hk.lasttab",t);setView("haicais");render()}
-function openMenu(){
-  const items=all();
-  const c={todos:items.length,fav:items.filter(h=>h.fav).length,kigos:kigos.length||""};
-  SEASONS.forEach(([k])=>c[k]=items.filter(h=>h.season===k).length);
-  document.querySelectorAll("#menu [data-mc]").forEach(el=>{const k=el.dataset.mc;el.textContent=k==="sync"?($("#sync-txt").textContent.split("·")[0].trim()):(c[k]??"")});
-  document.querySelectorAll('#menu [data-go^="tab:"]').forEach(b=>b.classList.toggle("on",b.dataset.go==="tab:"+st.tab&&!st.q));
-  $("#menu").hidden=false; document.documentElement.style.overflow="hidden";
-  setTimeout(()=>$("#menu .mi.primary").focus(),30);
+/* ---------- barra de ícones, busca e atalhos ---------- */
+function clearQ(){st.q="";$("#q").value="";$("#q-clear").hidden=true}
+function setSearching(on){
+  document.body.classList.toggle("searching",on);$("#btn-search").setAttribute("aria-pressed",String(on));
+  if(!on&&st.q){clearQ();render()}
+  show2("#featured",view==="haicais"&&!st.q);
+  if(on)setTimeout(()=>$("#q").focus(),30);
 }
-function closeMenu(){$("#menu").hidden=true;document.documentElement.style.overflow=""}
-$("#btn-menu").addEventListener("click",openMenu);
-$("#btn-kigos").addEventListener("click",()=>{st.q="";$("#q").value="";$("#q-clear").hidden=true;setView("kigos")});
-$("#btn-home").addEventListener("click",goHome);
-$("#btn-book-top").addEventListener("click",()=>openBookForm());
-$("#menu").addEventListener("click",e=>{
-  const b=e.target.closest("[data-go]");if(!b)return;
-  const g=b.dataset.go; closeMenu(); if(g==="close")return;
-  if(g==="write"){openComposer(null);return}
-  if(g.startsWith("tab:")){st.q="";$("#q").value="";$("#q-clear").hidden=true;goTab(g.slice(4));return}
-  if(g==="fav"){st.q="★";$("#q").value="★";$("#q-clear").hidden=false;goTab("todos");if(!all().some(h=>h.fav))toast("Ainda não há favoritos: toque na estrela ☆ de um haicai.");return}
-  if(g==="random"){randomPick();return}
-  if(g==="kigos"){st.q="";$("#q").value="";$("#q-clear").hidden=true;goTab("kigos");return}
+function show2(sel,on){const el=$(sel);if(el)el.hidden=!on}
+$("#btn-search").addEventListener("click",()=>setSearching(!document.body.classList.contains("searching")));
+document.querySelectorAll(".tabbar [data-nav]").forEach(b=>b.addEventListener("click",()=>{
+  const v=b.dataset.nav;
+  if(v==="kigos"){if(view==="kigos"){st.ks="todas";st.kc="todas"}clearQ();setView("kigos");render();return}
+  if(v==="haicais"){if(view==="haicais"){window.scrollTo({top:0,behavior:"smooth"});return}setView("haicais");return}
+  if(v==="reencontro"){if(view==="reencontro")randomPick();else setView("reencontro");return}
+  setView(v);
+}));
+document.querySelectorAll("#voce [data-go]").forEach(b=>b.addEventListener("click",()=>{
+  const g=b.dataset.go;
+  if(g==="fav"){st.q="★";$("#q").value="★";$("#q-clear").hidden=false;st.tab="todos";store.set("hk.tab","todos");setView("haicais");setSearching(true);render();if(!all().some(h=>h.fav))toast("Ainda não há favoritos: toque na estrela de um haicai.");return}
   if(g==="book"){openBookForm();return}
-  if(g==="cloud"){toggleCloud(true);return}
-  if(g==="txt"){$("#btn-export").click();return}
-  if(g==="json"){$("#btn-backup").click();return}
-  if(g==="import"){$("#f-import").click();return}
-});
-document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!$("#menu").hidden)closeMenu()});
+}));
 
 /* ---------- nuvem ---------- */
 function fmtTime(t){const d=new Date(t);const same=d.toDateString()===new Date().toDateString();return (same?"":d.getDate()+"/"+(d.getMonth()+1)+" ")+String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0")}
@@ -1200,7 +1302,7 @@ function renderCloud(){
   else if(s.error){cls="err";txt="Backup com problema";}
   else if(s.pending){cls="wait";txt=s.pending+(s.pending>1?" mudanças esperando":" mudança esperando")+(s.online?"…":" internet");}
   else {cls="ok";txt="Salvo na nuvem"+(s.lastSync?" · "+fmtTime(s.lastSync):"");}
-  pill.className="sync-pill "+cls;$("#sync-txt").textContent=txt;
+  pill.className="ibtn sync-pill "+cls;$("#sync-line").className="sync-line "+cls;$("#sync-txt").textContent=txt;pill.setAttribute("aria-label","Nuvem e backup: "+txt);
   let st="";
   if(!C.cloudEnabled) st="O backup na nuvem ainda não foi configurado neste app. Seus haicais ficam guardados neste aparelho; use “Baixar backup” de vez em quando.";
   else if(!s.email) st="Entre com seu e-mail e senha para guardar uma cópia de tudo na nuvem. Sem internet o caderno continua funcionando: o backup acontece quando a conexão voltar.";
@@ -1209,10 +1311,8 @@ function renderCloud(){
   $("#cloud-login").hidden=!C.cloudEnabled||!!s.email;
   $("#cloud-in").hidden=!C.cloudEnabled||!s.email;
 }
-function toggleCloud(show){const on=show===undefined?view!=="nuvem":show;if(on){setView("nuvem");renderCloud()}else goHome()}
-$("#btn-cloud").addEventListener("click",()=>toggleCloud());
+function toggleCloud(show){const on=show===undefined?view!=="voce":show;if(on){setView("voce");renderCloud()}else goHome()}
 $("#sync-pill").addEventListener("click",()=>toggleCloud(true));
-$("#c-close").addEventListener("click",()=>{toggleCloud(false);if($("#cloud-newpass").hidden)$("#cloud-note").textContent=""});
 async function doAuth(kind){
   const email=$("#c-email").value.trim(),pass=$("#c-pass").value;
   if(!email||!pass){toast("Preencha e-mail e senha.");return}
@@ -1252,9 +1352,9 @@ function setStatus(m){const s=$("#status");s.textContent=m||"";s.hidden=!m}
 let lastVer="";
 C.onChange(what=>{
   renderCloud();
-  if(what==="change"||what==="load"){kigos=C.kigos;kigoCache=null;render();renderFeatured();updateSyl()}
+  if(what==="change"||what==="load"){kigos=C.kigos;kigoCache=null;render();renderFeatured();renderRe();updateSyl()}
   const empty=!C.haikus().length;
-  setStatus(empty?"Seu caderno neste aparelho ainda está vazio. "+(C.cloudEnabled&&!C.status.email?"Toque em ☁︎ e entre na sua conta para trazer seus haicais da nuvem.":C.status.email?"Trazendo seus haicais da nuvem…":"Toque em ☁︎ para importar um backup."):"");
+  setStatus(empty?"Seu caderno neste aparelho ainda está vazio. "+(C.cloudEnabled&&!C.status.email?"Toque em Você (o ícone de pessoa, embaixo) e entre na sua conta para trazer seus haicais da nuvem.":C.status.email?"Trazendo seus haicais da nuvem…":"Toque em Você (embaixo) para importar um backup."):"");
 });
 C.ready.then(r=>{
   if(!r)return;
