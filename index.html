@@ -140,6 +140,8 @@ mark{background:color-mix(in srgb,var(--accent) 22%,transparent);color:inherit;b
 .scan-s .post{color:var(--ink-3);opacity:.6}
 .kigo-found{display:flex;flex-wrap:wrap;gap:10px;font-size:12.5px;color:var(--ink-2);margin-top:4px}
 .kigo-found>span{display:inline-flex;align-items:center;gap:4px;color:var(--ink)}
+#kigo-row{display:flex;flex-direction:column;gap:6px;margin:10px 0 4px}
+#kigo-row .kq{font-size:12px;color:var(--ink-2)}
 /* saijiki */
 .kigo-head{display:grid;gap:10px;margin-top:6px}
 .kigo-intro{margin:0;font-size:13.5px;color:var(--ink-2);max-width:65ch}
@@ -275,6 +277,7 @@ footer{padding-block:40px 60px;color:var(--ink-3);font-size:12px;text-align:cent
   <section id="composer" hidden aria-label="Escrever haicai">
     <h2 id="composer-title">Novo haicai</h2>
     <textarea id="f-text" rows="3" placeholder="primeira linha&#10;segunda linha&#10;terceira linha" aria-label="Texto do haicai"></textarea>
+    <div id="kigo-row" hidden aria-live="polite"></div>
     <div class="row">
       <label class="field">Data<input type="date" id="f-date"></label>
       <label class="field" style="width:90px">Número<input type="number" id="f-num" min="1" inputmode="numeric"></label>
@@ -424,7 +427,7 @@ const C=window.Caderno;       // armazenamento local + nuvem (store.js)
 let canWrite=true;
 let view="haicais";
 let st={tab:(t=>t==="kigos"?"todos":t)(store.get("hk.tab","todos")),q:"",order:store.get("hk.order","desc"),ks:"todas",kc:"todas",kmine:false};
-let editingId=null, seasonManual=false, confirmId=null, featured=null;
+let editingId=null, seasonManual=false, kigoPick=null, kigoOff=new Set(), kigoFound=[], confirmId=null, featured=null;
 
 /* estações do hemisfério sul */
 function seasonOf(iso){
@@ -538,7 +541,7 @@ function card(h,terms,opts={}){
     ?`<span class="acts" style="opacity:1"><span class="confirm">Apagar este haicai?<button class="btn ghost danger" data-act="del-yes" data-id="${h.id}">Apagar</button><button class="btn ghost" data-act="del-no">Manter</button></span></span>`
     :`<span class="acts"><button class="btn ghost" data-act="edit" data-id="${h.id}">Editar</button><button class="btn ghost" data-act="del" data-id="${h.id}">Apagar</button></span>`):"";
   return `<article class="hk" data-id="${h.id}">
-    <div class="meta"><span class="num">${h.n!=null?esc(h.n):"—"}</span>${h.season?`<span class="dot c-${h.season}" title="${SLABEL[h.season]}"></span>`:""}<time>${fmtDate(h.date)}</time>${h.sk&&h.kigo?`<span class="kg" title="Estação deduzida pelo kigo">kigo: ${hl(h.kigo,terms)}</span>`:""}${acts}${opts.noActs?(h.fav?'<span class="star on" aria-label="favorito">★</span>':""):`<button type="button" class="star${h.fav?" on":""}" data-act="fav" data-id="${h.id}" aria-pressed="${!!h.fav}" aria-label="${h.fav?"Tirar dos favoritos":"Marcar como favorito"}">${h.fav?"★":"☆"}</button>`}</div>
+    <div class="meta"><span class="num">${h.n!=null?esc(h.n):"—"}</span>${h.season?`<span class="dot c-${h.season}" title="${SLABEL[h.season]}"></span>`:""}<time>${fmtDate(h.date)}</time>${h.kigo?`<span class="kg" title="Kigo deste haicai">kigo: ${hl(h.kigo,terms)}</span>`:""}${acts}${opts.noActs?(h.fav?'<span class="star on" aria-label="favorito">★</span>':""):`<button type="button" class="star${h.fav?" on":""}" data-act="fav" data-id="${h.id}" aria-pressed="${!!h.fav}" aria-label="${h.fav?"Tirar dos favoritos":"Marcar como favorito"}">${h.fav?"★":"☆"}</button>`}</div>
     ${h.note?`<p class="note">${hl(h.note,terms)}</p>`:""}
     ${h.jp?`<p class="jp" lang="ja">${hl(h.jp,terms)}</p>`:""}
     ${h.romaji?`<p class="ro">${hl(h.romaji,terms)}</p>`:""}
@@ -588,9 +591,32 @@ function renderFeatured(){
 }
 
 /* ---------- compositor ---------- */
-function renderSeasonChips(sel){
+function renderSeasonChips(sel,kg){
   $("#f-season").innerHTML=SEASONS.map(([k,l])=>`<button type="button" class="chip c-${k}" data-season="${k}" aria-pressed="${sel===k}"><span class="dot"></span>${l}</button>`).join("");
-  $("#season-auto").textContent=seasonManual?"":"(automática pela data)";
+  $("#season-auto").textContent=seasonManual?"":kg?`(sugerida pelo kigo “${kg.t.toLocaleLowerCase("pt-BR")}”)`:"(automática pela data)";
+}
+/* kigo no compositor: aponta o kigo; com mais de um, a pessoa escolhe; sem kigo, nada */
+function pickedKigo(){
+  const mine=kigoFound.find(k=>foldStr(k.t)===kigoPick); if(mine)return mine;
+  return kigoFound.length===1&&!kigoOff.has(foldStr(kigoFound[0].t))?kigoFound[0]:null;
+}
+function applySeasonAuto(){
+  if(seasonManual)return;
+  const k=pickedKigo();
+  renderSeasonChips(k?kSeason(k.c):seasonOf($("#f-date").value),k);
+}
+function updateKigo(){
+  const kg=kigos.length?findKigos($("#f-text").value):[];
+  kigoFound=kg;
+  const pk=pickedKigo(), pf=pk?foldStr(pk.t):null;
+  const box=$("#kigo-row");
+  if(!kg.length){box.innerHTML="";box.hidden=true}
+  else{
+    box.hidden=false;
+    box.innerHTML=`<span class="kq">${kg.length>1?"Achei mais de um kigo. Qual é o deste haicai?":"Kigo"}</span><div class="chips" role="group" aria-label="Kigo">${kg.map(k=>{const s=kSeason(k.c),f=foldStr(k.t);
+      return `<button type="button" class="chip c-${s}" data-kigo="${esc(f)}" aria-pressed="${f===pf}"><span class="dot"></span>${esc(k.t.toLocaleLowerCase("pt-BR"))} · ${SLABEL[s]}</button>`}).join("")}</div>`;
+  }
+  applySeasonAuto();
 }
 function currentSeason(){const b=$("#f-season [aria-pressed=true]");return b?b.dataset.season:null}
 function openComposer(h){
@@ -602,6 +628,7 @@ function openComposer(h){
   $("#f-note").value=h?.note||""; $("#f-jp").value=h?.jp||""; $("#f-ro").value=h?.romaji||""; $("#f-place").value=h?.place||"";
   $("#f-more").open=!!(h&&(h.note||h.jp||h.romaji||h.place));
   seasonManual=!!(h&&h.season&&h.season!==seasonOf(h.date));
+  kigoPick=h&&h.kigo?foldStr(h.kigo):null; kigoOff=new Set();
   renderSeasonChips(h?h.season:seasonOf(todayISO()));
   setView("escrever"); updateSyl();
   setTimeout(()=>$("#f-text").focus({preventScroll:true}),250);
@@ -650,9 +677,8 @@ function updateSyl(){
   const rows=lines.map(l=>{const r=/[\u3040-\u30ff\u4e00-\u9fff]/.test(l)?null:scanLine(l);
     if(!r) return "";
     return `<div class="scan-row"><span class="scan-n">${r.count}</span><span class="scan-s">${r.units.map((u,i)=>`<span class="${i>r.stress?"post":i===r.stress?"ton":""}">${esc(u.t)}</span>`).join('<i>/</i>')}</span></div>`}).filter(Boolean);
-  const kg=kigos.length?findKigos($("#f-text").value):[];
-  $("#syl").innerHTML=(rows.length?`<div class="scan-head">Escansão <span class="hint">sílabas poéticas até a última tônica · ‿ junção de vogais</span></div>${rows.join("")}`:"")
-    +(kg.length?`<div class="kigo-found">Kigo: ${kg.map(k=>`<span class="c-${kSeason(k.c)}"><span class="dot"></span> ${esc(k.t)} · ${SLABEL[kSeason(k.c)]}</span>`).join("")}</div>`:"");
+  $("#syl").innerHTML=rows.length?`<div class="scan-head">Escansão <span class="hint">sílabas poéticas até a última tônica · ‿ junção de vogais</span></div>${rows.join("")}`:"";
+  updateKigo();
 }
 async function save(){
   const text=$("#f-text").value.replace(/\s+$/,"").replace(/^\s+/,"");
@@ -662,8 +688,9 @@ async function save(){
   const id=editingId||("n"+Date.now().toString(36));
   const doc={n:$("#f-num").value?+$("#f-num").value:null,date,season:currentSeason()||seasonOf(date),text,
     jp:$("#f-jp").value.trim(),romaji:$("#f-ro").value.trim(),note:$("#f-note").value.trim(),place:$("#f-place").value.trim(),
-    vol:prev?.vol??3,createdAt:prev?.createdAt??(prev?0:Date.now()),ord:prev?.ord??Date.now(),kigo:prev?.kigo,sk:prev?.sk};
-  if(prev&&prev.date!==date){delete doc.sk;delete doc.kigo}
+    vol:prev?.vol??3,createdAt:prev?.createdAt??(prev?0:Date.now()),ord:prev?.ord??Date.now()};
+  const pk=pickedKigo();
+  if(pk){doc.kigo=pk.t.toLocaleLowerCase("pt-BR");if(!date&&doc.season===kSeason(pk.c))doc.sk=1}
   $("#btn-save").disabled=true;
   try{
     Object.keys(doc).forEach(k=>doc[k]===undefined&&delete doc[k]);
@@ -704,7 +731,8 @@ $("#btn-cancel").addEventListener("click",closeComposer);
 $("#btn-save").addEventListener("click",save);
 $("#f-text").addEventListener("input",()=>{updateSyl();if(!editingId)store.set("hk.draft",$("#f-text").value)});
 $("#composer").addEventListener("keydown",e=>{if(e.key==="Enter"&&(e.metaKey||e.ctrlKey)){e.preventDefault();save()}if(e.key==="Escape")closeComposer()});
-$("#f-date").addEventListener("change",()=>{if(!seasonManual)renderSeasonChips(seasonOf($("#f-date").value))});
+$("#f-date").addEventListener("change",applySeasonAuto);
+$("#kigo-row").addEventListener("click",e=>{const b=e.target.closest("[data-kigo]");if(!b)return;const f=b.dataset.kigo,cur=pickedKigo();if(cur&&foldStr(cur.t)===f){kigoOff.add(f);kigoPick=null}else{kigoPick=f;kigoOff.delete(f)}updateKigo()});
 $("#f-season").addEventListener("click",e=>{const b=e.target.closest("[data-season]");if(!b)return;seasonManual=true;renderSeasonChips(b.dataset.season)});
 function randomPick(){if(view!=="haicais")setView("haicais");const items=all().filter(h=>h.text||h.jp);featured=items[Math.floor(Math.random()*items.length)]?.id;renderFeatured();$("#featured").scrollIntoView({behavior:"smooth",block:"nearest"})}
 
