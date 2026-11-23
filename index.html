@@ -143,6 +143,7 @@ body[data-view="haicais"]:not(.searching) .search{display:none}
 .hk{background:var(--surface);border-radius:22px;padding:18px 18px 10px;margin-top:10px;box-shadow:var(--shadow);display:grid;gap:8px}
 .hk .poem{font-family:var(--f-poem);font-size:18px;line-height:1.65;margin:0;white-space:pre-line;overflow-wrap:anywhere}
 .poem{font-family:var(--f-poem);white-space:pre-line;overflow-wrap:anywhere;margin:0}
+.poem.fit,.jp.fit{white-space:pre;overflow-wrap:normal}
 .note{font-size:13.5px;color:var(--ink-2);font-style:italic;margin:0;max-width:62ch}
 .jp{font-family:var(--f-poem);font-size:18px;margin:0;letter-spacing:.06em;white-space:pre-line}
 .ro{font-size:13px;color:var(--ink-3);margin:0;white-space:pre-line}
@@ -689,7 +690,7 @@ function render(){
     lastM=mk;
     html+=card(h,terms);
   }
-  $("#list").innerHTML=html;
+  $("#list").innerHTML=html;scheduleFit();
 }
 /* reencontro: na capa, um haicai do mesmo dia em outro ano; se não houver, um do caderno escolhido para o dia */
 function sameDay(items){const t=todayISO().slice(5),y=todayISO().slice(0,4);return items.filter(h=>h.date&&h.date.slice(5)===t&&h.date.slice(0,4)!==y&&(h.text||h.jp))}
@@ -711,9 +712,27 @@ function featCard(h,label,big){
     ${big&&h.kigo?`<span class="kg">kigo: ${esc(h.kigo)}</span>`:""}
     <div class="ft"><span class="m">${esc(m)}</span>${right}</div></div>`;
 }
+/* verso inteiro numa linha: se um verso não cabe, o poema todo diminui um pouco (até 60%); só quebra se nem assim couber */
+let fitRaf=0;
+function scheduleFit(){cancelAnimationFrame(fitRaf);fitRaf=requestAnimationFrame(fitPoems)}
+function fitPoems(){
+  const els=[...document.querySelectorAll(".hk .poem,.feat .poem,.hk .jp,.feat .jp")].filter(el=>el.offsetParent&&el.dataset.fitw!==String(el.parentNode.clientWidth));
+  els.forEach(el=>{el.style.fontSize="";el.classList.add("fit")});
+  const over=els.filter(el=>el.scrollWidth>el.clientWidth+1);
+  els.forEach(el=>{
+    if(over.includes(el)){
+      const base=parseFloat(getComputedStyle(el).fontSize);let fs=base;
+      while(el.scrollWidth>el.clientWidth+1&&fs>base*0.6){fs-=0.5;el.style.fontSize=fs+"px"}
+      if(el.scrollWidth>el.clientWidth+1)el.classList.remove("fit");
+    }
+    el.dataset.fitw=el.parentNode.clientWidth;
+  });
+}
+let fitT;window.addEventListener("resize",()=>{clearTimeout(fitT);fitT=setTimeout(()=>{document.querySelectorAll("[data-fitw]").forEach(el=>delete el.dataset.fitw);scheduleFit()},150)});
+document.fonts&&document.fonts.ready.then(()=>{document.querySelectorAll("[data-fitw]").forEach(el=>delete el.dataset.fitw);scheduleFit()});
 function renderFeatured(){
   const box=$("#featured"),p=dailyPick(all());
-  box.innerHTML=p?featCard(p.h,p.label,false):"";
+  box.innerHTML=p?featCard(p.h,p.label,false):"";scheduleFit();
 }
 function renderRe(){
   if(view!=="reencontro")return;
@@ -722,6 +741,7 @@ function renderRe(){
   if(!h&&pool.length){h=pool[Math.floor(Math.random()*pool.length)];featured=h.id}
   $("#re-card").innerHTML=h?featCard(h,h.date?"Escrito em "+h.date.slice(0,4):"Do seu caderno",true):`<p class="empty">Quando houver haicais no caderno, eles reaparecem aqui.</p>`;
   const same=sameDay(items).filter(x=>x.id!==featured);
+  scheduleFit();
   $("#re-day").innerHTML=same.length?`<h3 class="sec-t">Neste dia, em outros anos</h3>${same.slice(-5).reverse().map(x=>card(x,[])).join("")}`:"";
 }
 function renderVoce(items){
@@ -1265,6 +1285,7 @@ function setView(v){
   if(cur)$(cur).setAttribute("aria-current","page");
   if(v==="voce")renderCloud();
   if(v==="reencontro")renderRe();
+  scheduleFit();
   window.scrollTo(0,0);
 }
 function goHome(){setView("haicais")}
