@@ -156,6 +156,8 @@ mark{background:color-mix(in srgb,var(--accent) 22%,transparent);color:inherit;b
 #cloud p{margin:0;font-size:13.5px;color:var(--ink-2)}
 #cloud .row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
 #cloud input[type=email],#cloud input[type=password]{flex:1 1 200px;min-width:0;border:1px solid var(--rule);background:var(--paper);border-radius:10px;padding:10px 12px;font-size:16px}
+#cloud .note-box{background:var(--accent-soft);color:var(--ink);border-radius:10px;padding:9px 12px}
+#cloud .note-box:empty{display:none}
 #cloud .sec{border-top:1px solid var(--rule);padding-top:12px;display:grid;gap:8px}
 #cloud .sec h3{margin:0;font-size:13px;font-weight:700;color:var(--ink-2);letter-spacing:.02em}
 .sync-pill{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--ink-2);background:none;border:0;padding:2px 0;cursor:pointer}
@@ -187,11 +189,17 @@ footer{padding-block:40px 60px;color:var(--ink-3);font-size:12px;text-align:cent
     <section id="cloud" hidden aria-label="Nuvem e backup">
       <h2>Nuvem e backup</h2>
       <p id="cloud-state"></p>
+      <p id="cloud-note" class="note-box"></p>
       <div id="cloud-login" class="row" hidden>
         <input type="email" id="c-email" placeholder="seu e-mail" autocomplete="username" inputmode="email">
         <input type="password" id="c-pass" placeholder="senha" autocomplete="current-password">
         <button class="btn primary" id="c-login" type="button">Entrar</button>
         <button class="btn ghost" id="c-signup" type="button">Criar conta</button>
+        <button class="btn ghost" id="c-forgot" type="button">Esqueci a senha</button>
+      </div>
+      <div id="cloud-newpass" class="row" hidden>
+        <input type="password" id="c-newpass" placeholder="nova senha (mínimo 6 caracteres)" autocomplete="new-password">
+        <button class="btn primary" id="c-savepass" type="button">Salvar nova senha</button>
       </div>
       <div id="cloud-in" class="row" hidden>
         <button class="btn primary" id="c-sync" type="button">Sincronizar agora</button>
@@ -363,7 +371,7 @@ function renderKigos(items){
   if(st.kmine) list=list.filter(k=>counts.has(k.t));
   const chip=(grp,v,l,cls="")=>`<button type="button" class="chip ${cls}" data-act="kf" data-g="${grp}" data-v="${v}" aria-pressed="${st[grp]===v}">${cls?'<span class="dot"></span>':""}${l}</button>`;
   let html=`<div class="kigo-head">
-    <p class="kigo-intro"><span lang="ja">歳時記</span> · Saijiki brasileiro com os ${kigos.length} termos de estação de <em>Natureza – Berço do Haicai</em>, de H. Masuda Goga e Teruko Oda, na lista organizada por Carlos Martins (O Zen do Haicai, 2018). Toque num kigo para ver os seus haicais com ele.</p>
+    <p class="kigo-intro"><span lang="ja">歳時記</span> · Saijiki brasileiro com ${kigos.length} termos de estação, separados por estação e categoria. Toque num kigo para ver os seus haicais com ele.</p>
     <div class="chips">${chip("ks","todas","Todas")}${SEASONS.map(([k,l])=>chip("ks",k,l,"c-"+k)).join("")}</div>
     <div class="chips">${chip("kc","todas","Todos os temas")}${Object.entries(KCAT).map(([k,l])=>chip("kc",k,l)).join("")}</div>
     <label class="mine"><input type="checkbox" id="k-mine" ${st.kmine?"checked":""}> Só os que aparecem nos meus haicais</label>
@@ -617,7 +625,7 @@ function renderCloud(){
 function toggleCloud(show){const el=$("#cloud");el.hidden=show===undefined?!el.hidden:!show;if(!el.hidden){renderCloud();el.scrollIntoView({behavior:"smooth",block:"nearest"})}}
 $("#btn-cloud").addEventListener("click",()=>toggleCloud());
 $("#sync-pill").addEventListener("click",()=>toggleCloud(true));
-$("#c-close").addEventListener("click",()=>toggleCloud(false));
+$("#c-close").addEventListener("click",()=>{toggleCloud(false);if($("#cloud-newpass").hidden)$("#cloud-note").textContent=""});
 async function doAuth(kind){
   const email=$("#c-email").value.trim(),pass=$("#c-pass").value;
   if(!email||!pass){toast("Preencha e-mail e senha.");return}
@@ -625,14 +633,30 @@ async function doAuth(kind){
   const b=kind==="login"?$("#c-login"):$("#c-signup");b.disabled=true;
   try{
     if(kind==="login"){await C.login(email,pass);toast("Conectado. Backup em andamento.")}
-    else{const r=await C.signup(email,pass);toast(r==="ok"?"Conta criada e conectada.":"Conta criada. Confirme pelo e-mail e depois toque em Entrar.")}
+    else{const r=await C.signup(email,pass);if(r==="ok")toast("Conta criada e conectada.");else{$("#cloud-note").textContent="Enviamos um e-mail para "+email+". Abra o link dele para confirmar a conta (olhe também no spam) e depois volte aqui e toque em Entrar.";toast("Confirme pelo e-mail que enviamos.")}}
     $("#c-pass").value="";
-  }catch(e){toast(/invalid/i.test(e.message)?"E-mail ou senha não conferem.":/already/i.test(e.message)?"Esse e-mail já tem conta: use Entrar.":/fetch|network|load failed/i.test(e.message)?"Sem internet agora.":"Não deu certo: "+e.message)}
+  }catch(e){toast(/not confirmed/i.test(e.message)?"Falta confirmar o e-mail: abra o link que enviamos e depois toque em Entrar.":/rate limit|security purposes/i.test(e.message)?"Muitas tentativas seguidas. Espere alguns minutos e tente de novo.":/invalid/i.test(e.message)?"E-mail ou senha não conferem.":/already/i.test(e.message)?"Esse e-mail já tem conta: use Entrar.":/fetch|network|load failed/i.test(e.message)?"Sem internet agora.":"Não deu certo: "+e.message)}
   finally{b.disabled=false}
 }
 $("#c-login").addEventListener("click",()=>doAuth("login"));
 $("#c-signup").addEventListener("click",()=>doAuth("signup"));
 $("#c-pass").addEventListener("keydown",e=>{if(e.key==="Enter")doAuth("login")});
+$("#c-forgot").addEventListener("click",async()=>{
+  const email=$("#c-email").value.trim();
+  if(!email){toast("Escreva seu e-mail no campo acima e toque de novo em “Esqueci a senha”.");$("#c-email").focus();return}
+  const b=$("#c-forgot");b.disabled=true;
+  try{await C.recover(email);$("#cloud-note").textContent="Se houver uma conta com "+email+", enviamos um link para criar uma senha nova (olhe também no spam). Abra o link neste aparelho.";toast("E-mail enviado.")}
+  catch(e){toast(/rate limit|security purposes/i.test(e.message)?"Muitos pedidos seguidos. Espere alguns minutos e tente de novo.":/fetch|network|load failed/i.test(e.message)?"Sem internet agora.":"Não deu certo: "+e.message)}
+  finally{b.disabled=false}
+});
+$("#c-savepass").addEventListener("click",async()=>{
+  const pw=$("#c-newpass").value;
+  if(pw.length<6){toast("A senha precisa ter pelo menos 6 caracteres.");return}
+  const b=$("#c-savepass");b.disabled=true;
+  try{await C.updatePassword(pw);$("#c-newpass").value="";$("#cloud-newpass").hidden=true;$("#cloud-note").textContent="";renderCloud();toast("Senha nova salva. Use ela para entrar nos outros aparelhos.")}
+  catch(e){toast(/same|different/i.test(e.message)?"A senha nova precisa ser diferente da antiga.":"Não deu certo: "+e.message)}
+  finally{b.disabled=false}
+});
 $("#c-sync").addEventListener("click",()=>C.syncNow());
 $("#c-logout").addEventListener("click",async()=>{await C.logout();toast("Você saiu. Os haicais continuam neste aparelho.")});
 
@@ -645,7 +669,12 @@ C.onChange(what=>{
   const empty=!C.haikus().length;
   setStatus(empty?"Seu caderno neste aparelho ainda está vazio. "+(C.cloudEnabled&&!C.status.email?"Toque em ☁︎ e entre na sua conta para trazer seus haicais da nuvem.":C.status.email?"Trazendo seus haicais da nuvem…":"Toque em ☁︎ para importar um backup."):"");
 });
-C.ready.catch(()=>setStatus("Este navegador não deixou o caderno guardar dados. Abra pelo Safari e adicione à Tela de Início."));
+C.ready.then(r=>{
+  if(!r)return;
+  if(r.error){toggleCloud(true);toast(/expired/i.test(r.error)?"Esse link já expirou ou já foi usado. Peça outro.":"Não deu para usar esse link. Peça outro.");return}
+  if(r.type==="recovery"){toggleCloud(true);$("#cloud-newpass").hidden=false;$("#cloud-note").textContent="Escolha sua senha nova:";$("#c-newpass").focus();return}
+  if(r.type==="signup"||r.type==="email"){toggleCloud(true);toast("E-mail confirmado! Você já está conectado.");$("#cloud-note").textContent="E-mail confirmado e conta conectada. Se você usa o app pela tela de início, abra ele e toque em Entrar com seu e-mail e senha.";}
+}).catch(()=>setStatus("Este navegador não deixou o caderno guardar dados. Abra pelo Safari e adicione à Tela de Início."));
 render();
 
 if("serviceWorker" in navigator&&location.protocol!=="file:"){

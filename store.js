@@ -41,7 +41,8 @@
 
   /* ---------- estado em memória ---------- */
   const docs = new Map(); // id -> registro
-  let kigos = [];
+  let kigos = [], userKigos = [];
+  const kigosReady = fetch("kigos.json").then(r => r.ok ? r.json() : []).then(l => { if (Array.isArray(l) && l.length) { kigos = l; emit("change") } }).catch(() => { });
   const listeners = new Set();
   const status = { cloud: CLOUD_ON, email: null, syncing: false, lastSync: null, pending: 0, error: null, online: navigator.onLine };
   function emit(what) { status.pending = [...docs.values()].filter(d => d.dirty).length; listeners.forEach(f => { try { f(what) } catch (e) { } }); }
@@ -50,7 +51,8 @@
     const rows = await tx("docs", "readonly", s => req(s.getAll()));
     rows.forEach(r => docs.set(r.id, r));
     const k = docs.get(KIGOS_ID);
-    kigos = k && !k.deleted && k.data && Array.isArray(k.data.list) ? k.data.list : [];
+    userKigos = k && !k.deleted && k.data && Array.isArray(k.data.list) ? k.data.list : [];
+    if (!kigos.length) kigos = userKigos;
     const sess = await kvGet("session");
     session = sess || null;
     status.email = session?.user?.email || null;
@@ -95,14 +97,6 @@
       if (cur && cur.updatedAt >= ts) { kept++; return }
       recs.push({ id, data, deleted: false, updatedAt: ts, dirty: true }); added++;
     });
-    if (Array.isArray(pack.kigos) && pack.kigos.length) {
-      const cur = docs.get(KIGOS_ID);
-      const ts = pack.kigosUpdatedAt || 1;
-      if (!cur || cur.updatedAt < ts || !kigos.length) {
-        recs.push({ id: KIGOS_ID, data: { list: pack.kigos }, deleted: false, updatedAt: ts, dirty: true });
-        kigos = pack.kigos;
-      }
-    }
     await putLocal(recs);
     emit("change"); scheduleSync(300);
     return { added, kept };
@@ -111,7 +105,7 @@
     const hs = [];
     docs.forEach(r => { if (!r.deleted && r.id !== KIGOS_ID) hs.push(Object.assign({ id: r.id }, r.data, { updatedAt: r.updatedAt })) });
     hs.sort((a, b) => (a.ord ?? 0) - (b.ord ?? 0));
-    return { format: "caderno-haicais", version: 1, exportedAt: new Date().toISOString(), haikus: hs, kigos };
+    return { format: "caderno-haicais", version: 1, exportedAt: new Date().toISOString(), haikus: hs };
   }
 
   /* ---------- nuvem: autenticação ---------- */
@@ -134,10 +128,33 @@
     const j = await authCall("token?grant_type=password", { email, password });
     await setSession(j); status.error = null; emit("auth"); await sync(); return true;
   }
+  const REDIRECT = location.origin + location.pathname.replace(/index\.html$/, "");
+  const rt = () => "?redirect_to=" + encodeURIComponent(REDIRECT);
   async function signup(email, password) {
-    const j = await authCall("signup", { email, password });
+    const j = await authCall("signup" + rt(), { email, password });
     if (j.access_token) { await setSession(j); emit("auth"); await sync(); return "ok" }
     return "confirm"; // projeto exige confirmar o e-mail
+  }
+  async function recover(email) { await authCall("recover" + rt(), { email }); return true }
+  async function authUser(t, method, body) {
+    const r = await fetch(base() + "/auth/v1/user", { method: method || "GET", headers: { apikey: CFG.supabaseKey, Authorization: "Bearer " + t, "Content-Type": "application/json" }, body: body ? JSON.stringify(body) : undefined });
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) { const e = new Error(j.msg || j.message || ("Erro " + r.status)); e.code = j.error_code || r.status; throw e }
+    return j;
+  }
+  async function updatePassword(password) { await authUser(await token(), "PUT", { password }); return true }
+  /* volta do e-mail (confirmação de conta ou troca de senha): os dados vêm depois do # no endereço */
+  async function handleRedirect() {
+    const h = location.hash.replace(/^#/, "");
+    if (!h || !/access_token=|error=/.test(h)) return null;
+    const p = new URLSearchParams(h);
+    history.replaceState(null, "", location.pathname + location.search);
+    if (p.get("error")) return { error: p.get("error_code") || p.get("error"), message: p.get("error_description") || "" };
+    const t = p.get("access_token");
+    const u = await authUser(t);
+    await setSession({ access_token: t, refresh_token: p.get("refresh_token"), expires_in: +p.get("expires_in") || 3600, user: u });
+    status.error = null; emit("auth");
+    return { type: p.get("type") || "login" };
   }
   async function logout() {
     session = null; status.email = null; await kvSet("session", null); await kvSet("lastSync", null); emit("auth");
@@ -195,7 +212,7 @@
       }
       if (recs.length) {
         await putLocal(recs);
-        const k = docs.get(KIGOS_ID); if (k && !k.deleted && k.data?.list) kigos = k.data.list;
+        const k = docs.get(KIGOS_ID); if (k && !k.deleted && k.data?.list && !kigos.length) kigos = k.data.list;
         emit("change");
       }
       if (rows.length < 1000) break;
@@ -222,9 +239,9 @@
   setInterval(() => scheduleSync(0), 5 * 60 * 1000);
 
   window.Caderno = {
-    ready: load().then(() => scheduleSync(200)),
+    ready: load().then(async () => { let r = null; try { r = await handleRedirect() } catch (e) { r = { error: "link", message: e.message } } scheduleSync(200); return r }),
     haikus, get kigos() { return kigos }, status, version: () => docs.size + ":" + status.pending + ":" + kigos.length,
     onChange: f => listeners.add(f), saveHaiku, deleteHaiku, importPack, exportPack,
-    login, signup, logout, syncNow: () => sync(), cloudEnabled: CLOUD_ON,
+    login, signup, logout, recover, updatePassword, syncNow: () => sync(), cloudEnabled: CLOUD_ON,
   };
 })();
