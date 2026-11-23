@@ -165,9 +165,36 @@ mark{background:color-mix(in srgb,var(--accent) 22%,transparent);color:inherit;b
 .sync-pill.ok .sd{background:#4f8a5b}.sync-pill.wait .sd{background:var(--s-verao)}.sync-pill.err .sd{background:var(--danger)}
 .sync-pill.busy .sd{animation:pulse 1s infinite alternate}
 @keyframes pulse{to{opacity:.3}}
+/* favoritos */
+.star{margin-left:auto;border:0;background:none;cursor:pointer;font-size:16px;line-height:1;padding:4px 6px;color:var(--ink-3)}
+.acts + .star{margin-left:0}
+.star.on{color:#c9932b}
+/* livreto: formulário */
+#bookform{background:var(--sheet);border:1px solid var(--rule);border-radius:14px;padding:18px;margin-block:14px;display:grid;gap:14px}
+#bookform h2{margin:0;font-family:var(--f-poem);font-size:20px;font-weight:600}
+#bookform h2 span{color:var(--accent);margin-left:6px}
+#bookform .chip{--c:var(--accent)}
+.bk-p{margin:0;font-size:13px;color:var(--ink-2)}
+.bk-grid{display:grid;gap:10px;grid-template-columns:1fr 1fr}
+.bk-grid .wide{grid-column:1/-1}
+@media (max-width:520px){.bk-grid{grid-template-columns:1fr}}
+.field select{border:1px solid var(--rule);background:var(--paper);border-radius:8px;padding:7px 9px;font-size:14px;width:100%;color:var(--ink)}
+#bookform input,#bookform select{font-size:16px}
+.checks{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:13px;color:var(--ink)}
+.checks label{display:inline-flex;gap:6px;align-items:center;white-space:nowrap}
+.checks input{width:auto;padding:0;margin:0}
+#bookform{scroll-margin-top:140px}
+.btn.book{font-size:12.5px}
+/* livreto: visualização */
+#bookview{position:fixed;inset:0;z-index:50;overflow:auto;background:#e6e5df;-webkit-overflow-scrolling:touch}
+.bk-bar{position:sticky;top:0;z-index:2;display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:10px 16px;padding-top:calc(10px + env(safe-area-inset-top,0px));background:var(--paper);border-bottom:1px solid var(--rule)}
+.bk-bar .grow{flex:1;min-width:110px;font-size:12.5px;color:var(--ink-2)}
+.bk-tip{font-size:12px;color:#5a5a55;max-width:600px;margin:12px auto 0;padding:0 16px;line-height:1.5}
 footer{padding-block:40px 60px;color:var(--ink-3);font-size:12px;text-align:center}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
+<style id="book-css"></style>
+<style id="page-size"></style>
 </head>
 <body>
 
@@ -265,12 +292,68 @@ footer{padding-block:40px 60px;color:var(--ink-3);font-size:12px;text-align:cent
 <main class="wrap">
   <div class="listinfo">
     <span id="count"></span>
-    <button class="btn ghost" id="btn-order" type="button"></button>
+    <span class="row" style="gap:4px"><button class="btn ghost book" id="btn-book" type="button">📖 Livreto</button><button class="btn ghost" id="btn-order" type="button"></button></span>
   </div>
+  <section id="bookform" hidden aria-label="Fazer livreto">
+    <h2>Fazer livreto<span lang="ja">句集</span></h2>
+    <p class="bk-p">Escolha quais haicais entram. O livreto abre pronto para imprimir ou salvar em PDF.</p>
+    <div class="field">O que entra
+      <div class="chips" id="bk-mode" role="group" aria-label="O que entra">
+        <button type="button" class="chip" data-v="todo">Caderno todo</button>
+        <button type="button" class="chip" data-v="estacao">Uma estação</button>
+        <button type="button" class="chip" data-v="ano">Um ano</button>
+        <button type="button" class="chip" data-v="periodo">De uma data a outra</button>
+        <button type="button" class="chip" data-v="fav">Favoritos ★</button>
+        <button type="button" class="chip" data-v="kigo">Um kigo</button>
+        <button type="button" class="chip" data-v="busca" id="bk-mode-busca">Resultado da busca</button>
+      </div>
+    </div>
+    <div class="bk-grid">
+      <label class="field wide bk-sub" data-for="estacao">Estação<select id="bk-season"></select></label>
+      <label class="field wide bk-sub" data-for="ano">Ano<select id="bk-year"></select></label>
+      <label class="field bk-sub" data-for="periodo">De<input type="date" id="bk-from"></label>
+      <label class="field bk-sub" data-for="periodo">Até<input type="date" id="bk-to"></label>
+      <label class="field wide bk-sub" data-for="kigo">Kigo<input id="bk-kigo" list="bk-kigos" placeholder="ex.: chuva, ipê, cigarra" autocomplete="off"></label>
+      <p class="bk-p wide bk-sub" data-for="busca" id="bk-qinfo"></p>
+      <p class="bk-p wide bk-sub" data-for="fav">Toque na estrela ☆ ao lado de um haicai para marcá-lo como favorito.</p>
+      <label class="field">Título<input id="bk-title"></label>
+      <label class="field">Autor<input id="bk-author" placeholder="seu nome" autocomplete="name"></label>
+      <div class="field">Tamanho da página<div class="chips" id="bk-paper"><button type="button" class="chip" data-v="A5">A5 · livro</button><button type="button" class="chip" data-v="A4">A4 · folha</button></div></div>
+      <div class="field">Ordem<div class="chips" id="bk-order"><button type="button" class="chip" data-v="asc">Mais antigos primeiro</button><button type="button" class="chip" data-v="desc">Mais recentes primeiro</button></div></div>
+      <div class="field wide">Mostrar em cada haicai
+        <div class="checks" id="bk-show">
+          <label><input type="checkbox" data-k="num"> número</label>
+          <label><input type="checkbox" data-k="date"> data</label>
+          <label><input type="checkbox" data-k="kigo"> kigo</label>
+          <label><input type="checkbox" data-k="jp"> japonês e romaji</label>
+          <label><input type="checkbox" data-k="extra"> contexto e lugar</label>
+          <label><input type="checkbox" data-k="sep"> separar por estação e mês</label>
+        </div>
+      </div>
+    </div>
+    <datalist id="bk-kigos"></datalist>
+    <div class="composer-foot">
+      <strong id="bk-count" style="font-size:13px"></strong>
+      <div class="row">
+        <button class="btn" id="bk-close" type="button">Cancelar</button>
+        <button class="btn primary" id="bk-make" type="button">Ver livreto</button>
+      </div>
+    </div>
+  </section>
   <div id="list"><p class="empty">Abrindo o caderno…</p></div>
   <footer>Caderno de Haicais · 俳句帳</footer>
 </main>
 <div class="toast" id="toast" hidden></div>
+<div id="bookview" hidden>
+  <div class="bk-bar no-print">
+    <button class="btn" id="bk-back" type="button">← Voltar</button>
+    <span class="grow" id="bk-info"></span>
+    <button class="btn" id="bk-dl" type="button">Baixar arquivo</button>
+    <button class="btn primary" id="bk-print" type="button">Imprimir ou salvar PDF</button>
+  </div>
+  <p class="bk-tip no-print" id="bk-tip"></p>
+  <div id="book"></div>
+</div>
 
 <script src="config.js"></script>
 <script src="store.js"></script>
@@ -334,7 +417,7 @@ function hl(text,terms){
 function hay(h){
   let extra="";
   if(h.date){const[y,m,d]=h.date.split("-");extra=[MONTHS[m-1],y,d+"/"+m+"/"+y,(+d)+"/"+(+m)+"/"+y].join(" ")}
-  return foldStr([h.text,h.jp,h.romaji,h.note,h.place,h.kigo,extra,h.season?SLABEL[h.season]:""].join(" \n "));
+  return foldStr([h.text,h.jp,h.romaji,h.note,h.place,h.kigo,extra,h.season?SLABEL[h.season]:"",h.fav?"favorito":""].join(" \n "));
 }
 
 function all(){
@@ -400,7 +483,7 @@ function card(h,terms,opts={}){
     ?`<span class="acts" style="opacity:1"><span class="confirm">Apagar este haicai?<button class="btn ghost danger" data-act="del-yes" data-id="${h.id}">Apagar</button><button class="btn ghost" data-act="del-no">Manter</button></span></span>`
     :`<span class="acts"><button class="btn ghost" data-act="edit" data-id="${h.id}">Editar</button><button class="btn ghost" data-act="del" data-id="${h.id}">Apagar</button></span>`):"";
   return `<article class="hk" data-id="${h.id}">
-    <div class="meta"><span class="num">${h.n!=null?esc(h.n):"—"}</span>${h.season?`<span class="dot c-${h.season}" title="${SLABEL[h.season]}"></span>`:""}<time>${fmtDate(h.date)}</time>${h.sk&&h.kigo?`<span class="kg" title="Estação deduzida pelo kigo">kigo: ${hl(h.kigo,terms)}</span>`:""}${acts}</div>
+    <div class="meta"><span class="num">${h.n!=null?esc(h.n):"—"}</span>${h.season?`<span class="dot c-${h.season}" title="${SLABEL[h.season]}"></span>`:""}<time>${fmtDate(h.date)}</time>${h.sk&&h.kigo?`<span class="kg" title="Estação deduzida pelo kigo">kigo: ${hl(h.kigo,terms)}</span>`:""}${acts}${opts.noActs?(h.fav?'<span class="star on" aria-label="favorito">★</span>':""):`<button type="button" class="star${h.fav?" on":""}" data-act="fav" data-id="${h.id}" aria-pressed="${!!h.fav}" aria-label="${h.fav?"Tirar dos favoritos":"Marcar como favorito"}">${h.fav?"★":"☆"}</button>`}</div>
     ${h.note?`<p class="note">${hl(h.note,terms)}</p>`:""}
     ${h.jp?`<p class="jp" lang="ja">${hl(h.jp,terms)}</p>`:""}
     ${h.romaji?`<p class="ro">${hl(h.romaji,terms)}</p>`:""}
@@ -574,6 +657,7 @@ $("#btn-random").addEventListener("click",randomPick);
 document.addEventListener("click",e=>{
   const b=e.target.closest("[data-act]");if(!b)return;const a=b.dataset.act,id=b.dataset.id;
   if(a==="edit"){openComposer(all().find(x=>x.id===id))}
+  else if(a==="fav"){toggleFav(id)}
   else if(a==="del"){confirmId=id;render()}
   else if(a==="del-no"){confirmId=null;render()}
   else if(a==="del-yes"){del(id)}
@@ -603,6 +687,196 @@ $("#f-import").addEventListener("change",async e=>{
 
 /* ---------- carregar ---------- */
 function setStatus(m){const s=$("#status");s.textContent=m||"";s.hidden=!m}
+
+/* ---------- favoritos ---------- */
+async function toggleFav(id){
+  const h=all().find(x=>x.id===id); if(!h) return;
+  const data=Object.assign({},h); delete data.id;
+  if(h.fav) delete data.fav; else data.fav=true;
+  try{await C.saveHaiku(id,data);toast(h.fav?"Tirado dos favoritos.":"Guardado nos favoritos ★")}catch(e){toast("Não foi possível marcar agora.")}
+}
+
+/* ---------- livreto ---------- */
+const BOOK_CSS=`
+#book{color:#1c1c1a;font-family:"Shippori Mincho","Hiragino Mincho ProN","Yu Mincho",Georgia,serif;padding-bottom:24px}
+#book .pg{background:#fff;margin:16px auto;box-shadow:0 1px 8px rgba(0,0,0,.13);box-sizing:border-box;max-width:calc(100% - 24px)}
+#book.a5 .pg{width:148mm;padding:16mm 14mm}
+#book.a4 .pg{width:210mm;padding:20mm 22mm}
+#book.a5 .cover{min-height:210mm}
+#book.a4 .cover{min-height:297mm}
+@media screen{#book .b-sec + .b-sec:not(.nb){margin-top:-16px;padding-top:0}}
+#book .b-keep{break-inside:avoid;page-break-inside:avoid}
+#book .cover{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:6mm}
+#book .cover .b-kj{writing-mode:vertical-rl;font-size:30pt;letter-spacing:.2em;color:#2f4b78;margin-bottom:8mm}
+#book .cover h1{font-size:22pt;font-weight:600;margin:0;line-height:1.25}
+#book .cover .b-sub{font-family:"Zen Kaku Gothic New","Hiragino Sans",Arial,sans-serif;font-size:9pt;letter-spacing:.14em;text-transform:uppercase;color:#888;margin:0}
+#book .cover .b-au{font-size:13pt;margin:10mm 0 0}
+#book .b-sec + .b-sec{margin-top:0}
+#book .b-sec.nb{break-before:page;page-break-before:always}
+#book .b-sec + .b-sec:not(.nb) .b-season{margin-top:9mm}
+#book .b-flow{max-width:100mm;margin:0 auto}
+#book.a4 .b-flow{max-width:125mm}
+#book .b-season{font-size:15pt;font-weight:600;text-align:center;margin:0 0 5mm;break-after:avoid;page-break-after:avoid}
+#book .b-season small{display:block;font-family:"Zen Kaku Gothic New","Hiragino Sans",Arial,sans-serif;font-size:7.5pt;letter-spacing:.14em;text-transform:uppercase;color:#999;font-weight:400;margin-top:1mm}
+#book .b-month{font-family:"Zen Kaku Gothic New","Hiragino Sans",Arial,sans-serif;font-size:7pt;letter-spacing:.16em;text-transform:uppercase;color:#8d8d88;text-align:center;margin:5mm 0 3.5mm;break-after:avoid;page-break-after:avoid}
+#book .b-keep:first-child .b-month:first-child,#book .b-season + .b-month{margin-top:1mm}
+#book .b-hk{break-inside:avoid;page-break-inside:avoid;margin:0 0 6mm}
+#book .b-n{font-family:"Zen Kaku Gothic New","Hiragino Sans",Arial,sans-serif;font-size:7.5pt;color:#a5a5a0;margin:0 0 1mm}
+#book .b-note{font-size:9.5pt;font-style:italic;color:#555;margin:0 0 1.5mm;max-width:95mm}
+#book .b-jp{font-size:12pt;letter-spacing:.08em;margin:0 0 .5mm}
+#book .b-ro{font-family:"Zen Kaku Gothic New","Hiragino Sans",Arial,sans-serif;font-size:8pt;color:#7c7c78;margin:0 0 2mm;white-space:pre-line}
+#book .b-poem{font-size:11.5pt;line-height:1.5;white-space:pre-line;margin:0}
+#book.a4 .b-poem{font-size:12.5pt}
+#book .b-mt{font-family:"Zen Kaku Gothic New","Hiragino Sans",Arial,sans-serif;font-size:7.5pt;color:#9d9d98;margin:1mm 0 0;letter-spacing:.02em}
+#book .b-end{text-align:center;color:#c4c4bf;font-size:12pt;margin:6mm 0 0}
+@media print{
+  html,body{background:#fff!important}
+  body>*:not(#bookview){display:none!important}
+  body::before{display:none!important}
+  #bookview{position:static!important;overflow:visible!important;background:#fff!important}
+  .no-print{display:none!important}
+  #book{padding:0}
+  #book .pg{box-shadow:none;margin:0;padding:0!important;width:auto!important;max-width:none}
+  #book.a5 .cover{min-height:170mm}
+  #book.a4 .cover{min-height:250mm}
+  #book .cover{break-after:page;page-break-after:always}
+}`;
+$("#book-css").textContent=BOOK_CSS;
+const bk=Object.assign({mode:"todo",paper:"A5",order:"asc",show:{num:true,date:true,kigo:true,jp:true,extra:true,sep:true}},store.get("hk.book",{}));
+bk.mode=bk.mode==="busca"?"todo":bk.mode;
+let bkTitleEdited=false;
+function bkSave(){store.set("hk.book",{mode:bk.mode,paper:bk.paper,order:bk.order,show:bk.show})}
+function bkSeasons(items){
+  const keys=[];const seen=new Set();
+  items.forEach(h=>{const k=seasonKey(h,"x");if(k!=="none"&&!seen.has(k)){seen.add(k);keys.push(k)}});
+  return keys;
+}
+function bkSeasonLabel(k){const[t,sm]=seasonTitle(k);return t+(sm?" ("+sm+")":"")}
+function bkSearch(items){
+  const q=st.q.trim();if(!q)return [];
+  const numQ=/^#?\d+$/.test(q)?+q.replace("#",""):null;
+  const terms=numQ!=null?[]:foldStr(q).split(/\s+/).filter(Boolean);
+  let list=items.filter(h=>st.tab==="todos"||st.tab==="kigos"||h.season===st.tab);
+  if(numQ!=null) return list.filter(h=>h.n===numQ);
+  return list.filter(h=>{const s=hay(h);return terms.every(t=>s.includes(t))});
+}
+function bkItems(){
+  const items=all(); let list;
+  switch(bk.mode){
+    case "estacao": list=items.filter(h=>seasonKey(h,"x")===$("#bk-season").value);break;
+    case "ano": list=items.filter(h=>h.date&&h.date.startsWith($("#bk-year").value));break;
+    case "periodo":{const f=$("#bk-from").value,t=$("#bk-to").value;list=items.filter(h=>h.date&&(!f||h.date>=f)&&(!t||h.date<=t));break}
+    case "fav": list=items.filter(h=>h.fav);break;
+    case "kigo":{const v=$("#bk-kigo").value.trim();if(!v){list=[];break}const rx=kigoRx(v);list=items.filter(h=>rx.test(" "+hay(h)+" "));break}
+    case "busca": list=bkSearch(items);break;
+    default: list=items;
+  }
+  return bk.order==="desc"?list.slice().reverse():list;
+}
+function bkAutoTitle(){
+  const v=$("#bk-kigo").value.trim(),f=$("#bk-from").value,t=$("#bk-to").value;
+  switch(bk.mode){
+    case "estacao": return $("#bk-season").value?seasonTitle($("#bk-season").value)[0]:"Haicais";
+    case "ano": return "Haicais de "+$("#bk-year").value;
+    case "periodo": return f||t?"Haicais · "+(f?fmtDate(f):"início")+" a "+(t?fmtDate(t):"hoje"):"Haicais";
+    case "fav": return "Haicais escolhidos";
+    case "kigo": return v?v[0].toUpperCase()+v.slice(1):"Haicais";
+    case "busca": return "Haicais · “"+st.q.trim()+"”";
+    default: return "Haicais";
+  }
+}
+function bkSubtitle(list){
+  const ds=list.filter(h=>h.date).map(h=>h.date).sort();
+  let span="";
+  if(ds.length){const a=+ds[0].slice(0,4),b=+ds[ds.length-1].slice(0,4);span=a===b?String(a):a+"–"+b}
+  const kind=bk.mode==="kigo"&&$("#bk-kigo").value.trim()?"kigo: "+$("#bk-kigo").value.trim()+" · ":"";
+  return kind+list.length+" haicai"+(list.length===1?"":"s")+(span?" · "+span:"");
+}
+function bkUpdate(){
+  ["bk-mode","bk-paper","bk-order"].forEach(id=>{const key=id==="bk-mode"?"mode":id==="bk-paper"?"paper":"order";$("#"+id).querySelectorAll(".chip").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.v===bk[key])))});
+  document.querySelectorAll("#bookform .bk-sub").forEach(el=>el.hidden=el.dataset.for!==bk.mode);
+  $("#bk-mode-busca").hidden=!st.q.trim();
+  $("#bk-qinfo").textContent=st.q.trim()?"Entram os haicais da busca “"+st.q.trim()+"”"+(st.tab!=="todos"&&st.tab!=="kigos"?" na aba "+SLABEL[st.tab]:"")+".":"";
+  if(!bkTitleEdited) $("#bk-title").value=bkAutoTitle();
+  const n=bkItems().length;
+  $("#bk-count").textContent=n?n+" haicai"+(n===1?"":"s")+" no livreto":"Nenhum haicai com essa escolha.";
+  $("#bk-make").disabled=!n;
+}
+function openBookForm(){
+  const items=all();
+  const keys=bkSeasons(items); const cur=$("#bk-season").value;
+  $("#bk-season").innerHTML=keys.slice().reverse().map(k=>`<option value="${k}">${esc(bkSeasonLabel(k))}</option>`).join("");
+  if(cur&&keys.includes(cur))$("#bk-season").value=cur;
+  else{const ck=items.length?seasonKey(items[items.length-1],"x"):"";if(keys.includes(ck))$("#bk-season").value=ck}
+  const years=[...new Set(items.filter(h=>h.date).map(h=>h.date.slice(0,4)))].sort().reverse();
+  const cy=$("#bk-year").value; $("#bk-year").innerHTML=years.map(y=>`<option>${y}</option>`).join(""); if(cy&&years.includes(cy))$("#bk-year").value=cy;
+  const kc=kigoCounts(items); $("#bk-kigos").innerHTML=[...kc.entries()].sort((a,b)=>b[1]-a[1]).map(([t,c])=>`<option value="${esc(t)}">${c} haicai${c>1?"s":""}</option>`).join("");
+  $("#bk-author").value=store.get("hk.author","");
+  if(st.q.trim()) bk.mode="busca"; else if(bk.mode==="busca") bk.mode="todo";
+  document.querySelectorAll("#bk-show input").forEach(i=>i.checked=!!bk.show[i.dataset.k]);
+  bkTitleEdited=false;
+  $("#bookform").hidden=false; bkUpdate();
+  $("#bookform").scrollIntoView({behavior:"smooth",block:"start"});
+}
+function bkKigoOf(h){if(h.kigo)return h.kigo;if(!kigos.length||!h.text)return "";const k=findKigos(h.text)[0];return k?k.t:""}
+function bkHaiku(h){
+  const sh=bk.show; const meta=[];
+  if(sh.num&&h.n!=null) meta.push("nº "+h.n);
+  if(sh.date&&h.date) meta.push(fmtDate(h.date));
+  if(sh.kigo){const k=bkKigoOf(h);if(k)meta.push("kigo: "+k)}
+  if(sh.extra&&h.place) meta.push(h.place);
+  return `<div class="b-hk">${sh.extra&&h.note?`<p class="b-note">${esc(h.note)}</p>`:""}${sh.jp&&h.jp?`<p class="b-jp" lang="ja">${esc(h.jp)}</p>`:""}${sh.jp&&h.romaji?`<p class="b-ro">${esc(h.romaji)}</p>`:""}${h.text?`<p class="b-poem">${esc(h.text)}</p>`:""}${meta.length?`<p class="b-mt">${esc(meta.join(" · "))}</p>`:""}</div>`;
+}
+function bkBuild(list){
+  const title=$("#bk-title").value.trim()||"Haicais", author=$("#bk-author").value.trim();
+  let html=`<section class="pg cover"><div class="b-kj" lang="ja">俳句</div><h1>${esc(title)}</h1><p class="b-sub">${esc(bkSubtitle(list))}</p>${author?`<p class="b-au">${esc(author)}</p>`:""}</section>`;
+  if(!bk.show.sep){html+=`<section class="pg b-sec"><div class="b-flow">${list.map(bkHaiku).join("")}<p class="b-end">。</p></div></section>`;return html}
+  let cur=null,lastM=null,body="";
+  let cnt=0;const flush=()=>{if(cur!==null)html+=`<section class="pg b-sec${cnt>=6?" nb":""}"><div class="b-flow">${body}</div></section>`;body="";cnt=0};
+  for(const h of list){
+    const k=seasonKey(h,"x");
+    let head="";
+    if(k!==cur){flush();cur=k;lastM=null;const[t,sm]=seasonTitle(k);head+=`<h2 class="b-season">${esc(t)}${sm?`<small>${esc(sm)}</small>`:""}</h2>`}
+    const mk=h.date?h.date.slice(0,7):null;
+    if(mk&&mk!==lastM) head+=`<p class="b-month">${esc(monthTitle(h.date))}</p>`;
+    lastM=mk; cnt++; body+=head?`<div class="b-keep">${head}${bkHaiku(h)}</div>`:bkHaiku(h);
+  }
+  body+=`<p class="b-end">。</p>`; flush();
+  return html;
+}
+function bkFileName(){return ($("#bk-title").value.trim()||"Haicais").replace(/[\\/:*?"<>|]+/g,"-").slice(0,80)}
+let bkLastHtml="";
+function showBook(){
+  const list=bkItems(); if(!list.length)return;
+  store.set("hk.author",$("#bk-author").value.trim()); bkSave();
+  bkLastHtml=bkBuild(list);
+  const b=$("#book"); b.className=bk.paper==="A4"?"a4":"a5"; b.innerHTML=bkLastHtml;
+  $("#page-size").textContent="@page{size:"+bk.paper+";margin:"+(bk.paper==="A4"?"20mm 22mm":"16mm 14mm")+"}";
+  $("#bk-info").textContent=list.length+" haicai"+(list.length===1?"":"s")+" · "+bk.paper;
+  const ios=/iPhone|iPad|iPod/.test(navigator.userAgent);
+  $("#bk-tip").textContent=ios?"Para salvar em PDF: toque em “Imprimir ou salvar PDF”; na tela de impressão, toque no botão de compartilhar lá no alto e escolha “Salvar em Arquivos” (ou mande direto pelo WhatsApp/e-mail).":"Para salvar em PDF: toque em “Imprimir ou salvar PDF” e, como impressora, escolha “Salvar como PDF”.";
+  $("#bookview").hidden=false; $("#bookview").scrollTop=0; document.documentElement.style.overflow="hidden";
+}
+function closeBook(){$("#bookview").hidden=true;document.documentElement.style.overflow=""}
+$("#btn-book").addEventListener("click",()=>{if($("#bookform").hidden)openBookForm();else $("#bookform").hidden=true});
+$("#bk-close").addEventListener("click",()=>{$("#bookform").hidden=true});
+$("#bookform").addEventListener("click",e=>{
+  const c=e.target.closest(".chip");if(!c)return;
+  const g=c.parentElement.id; if(g==="bk-mode"){bk.mode=c.dataset.v;bkTitleEdited=false}else if(g==="bk-paper")bk.paper=c.dataset.v;else if(g==="bk-order")bk.order=c.dataset.v;
+  bkUpdate();
+});
+["bk-season","bk-year","bk-from","bk-to","bk-kigo"].forEach(id=>$("#"+id).addEventListener(id==="bk-kigo"?"input":"change",bkUpdate));
+$("#bk-title").addEventListener("input",()=>{bkTitleEdited=true});
+$("#bk-show").addEventListener("change",e=>{const k=e.target.dataset.k;if(k){bk.show[k]=e.target.checked;bkSave()}});
+$("#bk-make").addEventListener("click",showBook);
+$("#bk-back").addEventListener("click",closeBook);
+$("#bk-print").addEventListener("click",()=>{try{window.print()}catch(e){toast("Não deu para abrir a impressão. Use “Baixar arquivo”.")}});
+$("#bk-dl").addEventListener("click",()=>{
+  const doc=`<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc($("#bk-title").value.trim()||"Haicais")}</title><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;600&family=Zen+Kaku+Gothic+New:wght@400&display=swap"><style>body{margin:0;background:#e6e5df}${BOOK_CSS.replace("body>*:not(#bookview){display:none!important}","")}${$("#page-size").textContent}</style></head><body><div id="book" class="${$("#book").className}">${bkLastHtml}</div></body></html>`;
+  saveFile(bkFileName()+".html",doc,"text/html");
+});
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!$("#bookview").hidden)closeBook()});
+
 /* ---------- nuvem ---------- */
 function fmtTime(t){const d=new Date(t);const same=d.toDateString()===new Date().toDateString();return (same?"":d.getDate()+"/"+(d.getMonth()+1)+" ")+String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0")}
 function renderCloud(){
