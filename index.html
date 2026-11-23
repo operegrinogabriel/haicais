@@ -390,14 +390,6 @@ footer{padding-block:40px 60px;color:var(--ink-3);font-size:12px;text-align:cent
     <div class="bk-grid">
       <div class="field wide">Formato<div class="chips" id="sc-format"><button type="button" class="chip" data-v="sq">Quadrado · feed</button><button type="button" class="chip" data-v="pt">Retrato · feed</button><button type="button" class="chip" data-v="st">Stories</button></div></div>
       <div class="field wide">Fundo<div class="chips" id="sc-bg"><button type="button" class="chip" data-v="papel">Papel</button><button type="button" class="chip" data-v="noite">Noite</button><button type="button" class="chip" data-v="estacao">Cor da estação</button></div></div>
-      <div class="field wide">Mostrar
-        <div class="checks" id="sc-show">
-          <label><input type="checkbox" data-k="date"> data</label>
-          <label><input type="checkbox" data-k="season"> estação</label>
-          <label><input type="checkbox" data-k="kigo"> kigo</label>
-          <label><input type="checkbox" data-k="num"> número</label>
-        </div>
-      </div>
       <label class="field wide">Assinatura<input type="text" id="sc-sig" placeholder="seu nome ou @perfil" autocomplete="off" maxlength="40"></label>
     </div>
     <div class="composer-foot">
@@ -1013,10 +1005,11 @@ document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!$("#bookview").hid
 const SC_FMT={sq:[1080,1080],pt:[1080,1350],st:[1080,1920]};
 const SC_SEA={primavera:"#9c4268",verao:"#a3631a",outono:"#8f3f25",inverno:"#3f5d77"};
 const SC_KANJI={primavera:"春",verao:"夏",outono:"秋",inverno:"冬"};
-let sc=Object.assign({fmt:"sq",bg:"papel",show:{date:true,season:true,kigo:true,num:false}},store.get("hk.card",{}));
+let sc=Object.assign({fmt:"sq",bg:"papel"},store.get("hk.card",{}));
 let scId=null, scBlob=null, scSeq=0;
 function scHaiku(){return all().find(x=>x.id===scId)}
-function scKigo(h){if(h.kigo)return h.kigo;if(!kigos.length||!h.text)return "";const f=findKigos(h.text);return f.length===1?f[0].t.toLocaleLowerCase("pt-BR"):""}
+let scIconP=null;
+function scIcon(){return scIconP||(scIconP=new Promise(res=>{const im=new Image();im.onload=()=>res(im);im.onerror=()=>{scIconP=null;res(null)};im.src="icon-192.png"}))}
 function openShare(id){
   scId=id; if(!scHaiku())return;
   $("#sc-sig").value=store.get("hk.sig","");
@@ -1025,7 +1018,6 @@ function openShare(id){
 function scSync(){
   $("#sc-format").querySelectorAll(".chip").forEach(b=>b.setAttribute("aria-pressed",b.dataset.v===sc.fmt));
   $("#sc-bg").querySelectorAll(".chip").forEach(b=>b.setAttribute("aria-pressed",b.dataset.v===sc.bg));
-  $("#sc-show").querySelectorAll("input").forEach(i=>i.checked=!!sc.show[i.dataset.k]);
 }
 function scWrap(ctx,line,max){
   if(ctx.measureText(line).width<=max)return [line];
@@ -1048,7 +1040,7 @@ async function scDraw(){
   ctx.fillStyle=pal.bg;ctx.fillRect(0,0,W,H);
   const M=Math.round(W*0.1);
   // estação em kanji, discreto, no alto
-  if(sc.show.season&&sea){ctx.fillStyle=pal.acc;ctx.font=`400 ${Math.round(W*0.05)}px ${POEM}`;ctx.textBaseline="top";ctx.textAlign="left";ctx.fillText(SC_KANJI[sea],M,M*0.9)}
+  if(sea){ctx.fillStyle=pal.acc;ctx.font=`400 ${Math.round(W*0.05)}px ${POEM}`;ctx.textBaseline="top";ctx.textAlign="left";ctx.fillText(SC_KANJI[sea],M,M*0.9)}
   // poema: maior fonte que caiba
   const raw=poem.split("\n").map(l=>l.trim()).filter(Boolean);
   let fs=Math.round(W*(sc.fmt==="st"?0.07:0.064)),lines=[];const maxW=W-2*M;
@@ -1060,22 +1052,16 @@ async function scDraw(){
   const lh=fs*1.8, blockW=Math.max(...lines.map(l=>ctx.measureText(l).width),1), x0=Math.round((W-blockW)/2);
   const blockH=lh*(lines.length-1)+fs; let y=Math.round((H-blockH)/2+fs*0.85-(sc.fmt==="st"?H*0.02:0));
   lines.forEach(l=>{ctx.fillText(l,x0,y);y+=lh});
-  // rodapé: data · estação · kigo  |  assinatura
-  const parts=[];
-  if(sc.show.num&&h.n!=null)parts.push("nº "+h.n);
-  if(sc.show.date&&h.date)parts.push(fmtDate(h.date));
-  if(sc.show.season&&sea)parts.push(SLABEL[sea].toLocaleLowerCase("pt-BR"));
-  const kg=sc.show.kigo?scKigo(h):""; if(kg)parts.push("kigo: "+kg);
-  const sig=$("#sc-sig").value.trim();
-  const fy=H-M*0.95, ms=Math.round(W*0.028);
-  ctx.textBaseline="alphabetic";ctx.font=`400 ${ms}px ${UI}`;ctx.fillStyle=pal.soft;
-  const metaTxt=parts.join(" · "), sigFont=`400 ${Math.round(ms*1.15)}px ${POEM}`;
-  const metaW=ctx.measureText(metaTxt).width; ctx.font=sigFont; const sigW=sig?ctx.measureText("— "+sig).width:0; ctx.font=`400 ${ms}px ${UI}`;
-  const oneLine=!sig||!parts.length||metaW+sigW+ms*2<=W-2*M;
-  if(sig){ctx.textAlign="right";ctx.fillStyle=pal.ink;ctx.font=sigFont;ctx.fillText("— "+sig,W-M,fy);ctx.font=`400 ${ms}px ${UI}`;ctx.fillStyle=pal.soft}
-  const my2=oneLine?fy:fy-ms*1.9;
-  if(parts.length){ctx.textAlign="left";ctx.fillText(parts.join(" · "),M,my2)}
-  if(parts.length||sig){ctx.fillStyle=pal.acc;ctx.fillRect(M,(parts.length?my2:fy)-ms*2.3,Math.round(W*0.06),3)}
+  // rodapé: ícone do app no canto esquerdo, assinatura no direito
+  const sig=$("#sc-sig").value.trim(), fy=H-M*0.95, ms=Math.round(W*0.028);
+  const icon=await scIcon(); if(my!==scSeq)return;
+  const isz=Math.round(W*0.06);
+  if(icon){ctx.save();const r=isz*0.22,ix=M,iy=fy-isz*0.78;ctx.beginPath();
+    ctx.moveTo(ix+r,iy);ctx.arcTo(ix+isz,iy,ix+isz,iy+isz,r);ctx.arcTo(ix+isz,iy+isz,ix,iy+isz,r);ctx.arcTo(ix,iy+isz,ix,iy,r);ctx.arcTo(ix,iy,ix+isz,iy,r);ctx.closePath();
+    ctx.clip();ctx.drawImage(icon,ix,iy,isz,isz);ctx.restore()}
+  ctx.textBaseline="alphabetic";ctx.textAlign="left";ctx.font=`400 ${Math.round(ms*0.92)}px ${UI}`;ctx.fillStyle=pal.soft;
+  ctx.fillText("Caderno de Haicais",M+(icon?isz+ms*0.6:0),fy-isz*0.78+isz*0.5+ms*0.32);
+  if(sig){ctx.textAlign="right";ctx.fillStyle=pal.ink;ctx.font=`400 ${Math.round(ms*1.15)}px ${POEM}`;ctx.fillText("— "+sig,W-M,fy-isz*0.78+isz*0.5+ms*0.4)}
   scBlob=null; cv.toBlob(b=>{if(my===scSeq)scBlob=b},"image/png");
 }
 function scName(){const h=scHaiku();return "haicai"+(h&&h.n!=null?"-"+h.n:"")+".png"}
@@ -1089,7 +1075,6 @@ function scShare(){
 }
 $("#sc-format").addEventListener("click",e=>{const b=e.target.closest("[data-v]");if(!b)return;sc.fmt=b.dataset.v;store.set("hk.card",sc);scSync();scDraw()});
 $("#sc-bg").addEventListener("click",e=>{const b=e.target.closest("[data-v]");if(!b)return;sc.bg=b.dataset.v;store.set("hk.card",sc);scSync();scDraw()});
-$("#sc-show").addEventListener("change",e=>{const i=e.target.closest("input");if(!i)return;sc.show[i.dataset.k]=i.checked;store.set("hk.card",sc);scDraw()});
 let scT;$("#sc-sig").addEventListener("input",()=>{store.set("hk.sig",$("#sc-sig").value);clearTimeout(scT);scT=setTimeout(scDraw,200)});
 $("#sc-close").addEventListener("click",goHome);
 $("#sc-save").addEventListener("click",scDownload);
