@@ -1844,9 +1844,19 @@ $("#minibar").addEventListener("click",()=>window.scrollTo({top:0,behavior:"smoo
 })();
 
 if("serviceWorker" in navigator&&location.protocol!=="file:"){
-  navigator.serviceWorker.register("sw.js").then(reg=>{
-    reg.addEventListener("updatefound",()=>{const w=reg.installing;w&&w.addEventListener("statechange",()=>{if(w.state==="installed"&&navigator.serviceWorker.controller)toast("Nova versão do app pronta: feche e abra de novo para usar.")})});
+  const hadCtl=!!navigator.serviceWorker.controller;let reloading=false;
+  navigator.serviceWorker.register("sw.js",{updateViaCache:"none"}).then(reg=>{
+    // no iPhone o app volta do fundo sem recarregar: procura versão nova sempre que reaparece
+    const check=()=>reg.update().catch(()=>{});
+    document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")check()});
+    window.addEventListener("online",check);
   }).catch(()=>{});
+  // versão nova assumiu: recarrega sozinho, a não ser no meio de um haicai
+  navigator.serviceWorker.addEventListener("controllerchange",()=>{
+    if(!hadCtl||reloading)return;
+    if(view==="escrever"){toast("Nova versão do app pronta: feche e abra de novo para usar.");return}
+    reloading=true;location.reload();
+  });
 }
 })();
 </script>
