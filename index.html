@@ -73,7 +73,7 @@
 html,body{margin:0;background:var(--bg);color:var(--ink)}
 [hidden]{display:none!important}
 body{font-family:var(--f-ui);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased;padding-bottom:calc(120px + env(safe-area-inset-bottom,0px))}
-body[data-view="escrever"],body[data-view="livreto"],body[data-view="cartao"]{padding-bottom:calc(30px + env(safe-area-inset-bottom,0px))}
+body[data-view="escrever"],body[data-view="livreto"],body[data-view="cartao"],body[data-view="retro"]{padding-bottom:calc(30px + env(safe-area-inset-bottom,0px))}
 body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
 .wrap{max-width:640px;margin:0 auto;padding-left:max(20px,env(safe-area-inset-left,0px));padding-right:max(20px,env(safe-area-inset-right,0px))}
 button,input,textarea,select{font:inherit;color:inherit}
@@ -120,7 +120,7 @@ h1{margin:0;font-size:34px;font-weight:800;line-height:1.05;letter-spacing:-.035
 .hint{font-size:12px;color:var(--ink-3)}
 mark{background:color-mix(in srgb,var(--s-verao) 30%,transparent);color:inherit;border-radius:3px;padding:0 1px}
 .toast{position:fixed;left:50%;bottom:calc(100px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--on-ink);padding:10px 18px;border-radius:999px;font-size:13.5px;font-weight:600;z-index:60;max-width:calc(100vw - 40px);text-align:center}
-body[data-view="escrever"] .toast,body[data-view="livreto"] .toast,body[data-view="cartao"] .toast{bottom:auto;top:calc(14px + env(safe-area-inset-top,0px))}
+body[data-view="escrever"] .toast,body[data-view="livreto"] .toast,body[data-view="cartao"] .toast,body[data-view="retro"] .toast{bottom:auto;top:calc(14px + env(safe-area-inset-top,0px))}
 .empty{text-align:center;color:var(--ink-2);padding:48px 0;font-family:var(--f-poem);font-size:18px}
 
 /* barra: busca e estações */
@@ -316,7 +316,7 @@ details.more[open] summary::after{content:"–"}
 /* barra de ícones */
 .tabbar{position:fixed;z-index:30;left:max(20px,calc(50% - 300px));right:max(20px,calc(50% - 300px));bottom:calc(14px + env(safe-area-inset-bottom,0px));height:66px;border-radius:33px;display:flex;justify-content:space-around;align-items:center;padding:0 6px;
   background:var(--glass);-webkit-backdrop-filter:blur(20px) saturate(1.4);backdrop-filter:blur(20px) saturate(1.4);border:1px solid var(--glass-b);box-shadow:0 10px 30px rgba(20,20,20,.10),0 1px 3px rgba(20,20,20,.06)}
-body[data-view="escrever"] .tabbar,body[data-view="livreto"] .tabbar,body[data-view="cartao"] .tabbar{display:none}
+body[data-view="escrever"] .tabbar,body[data-view="livreto"] .tabbar,body[data-view="cartao"] .tabbar,body[data-view="retro"] .tabbar{display:none}
 .tbb{width:54px;height:50px;border:0;background:none;border-radius:25px;display:grid;place-items:center;color:var(--ink-3);cursor:pointer;position:relative;padding:0}
 .tbb svg.i{width:24px;height:24px;stroke-width:1.7}
 .tbb .kj{font-family:var(--f-poem);font-size:22px;font-weight:600;line-height:1}
@@ -387,6 +387,18 @@ body.mini .bar{top:calc(46px + env(safe-area-inset-top,0px))}
 #ptr svg.i{width:20px;height:20px;transition:transform .2s ease}
 #ptr.armed svg.i{transform:rotate(180deg)}
 #ptr.busy svg.i{animation:spin .8s linear infinite}
+
+/* retrospectiva do ano */
+.rt-years{margin-top:18px;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;margin-left:-20px;margin-right:-20px;padding:2px 20px 4px}
+.rt-years::-webkit-scrollbar{display:none}.rt-years .chip{flex:none}
+.rt-strip{--rh:min(54vh,560px);display:flex;gap:14px;overflow-x:auto;scroll-snap-type:x mandatory;margin:14px -20px 0;padding:8px calc(50% - var(--rh)*.28125) 14px;scrollbar-width:none;overscroll-behavior-x:contain}
+.rt-strip::-webkit-scrollbar{display:none}
+.rt-strip canvas{flex:none;display:block;height:var(--rh);width:calc(var(--rh)*.5625);scroll-snap-align:center;scroll-snap-stop:always;border-radius:14px;box-shadow:0 6px 22px rgba(0,0,0,.14);background:var(--soft)}
+.rt-dots{display:flex;justify-content:center;gap:6px;margin:2px 0 14px;min-height:6px}
+.rt-dots i{width:6px;height:6px;border-radius:3px;background:var(--line);transition:width .2s,background-color .2s}
+.rt-dots i.on{width:18px;background:var(--ink)}
+.rt-more{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin:0 0 14px}
+.rt-empty{margin:28px 0;color:var(--ink-2);font-size:15px;text-align:center}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 <style id="book-css"></style>
@@ -475,6 +487,7 @@ body.mini .bar{top:calc(46px + env(safe-area-inset-top,0px))}
     <div class="vgroup">
       <button class="vrow" type="button" data-go="fav"><span class="vi" style="color:var(--gold)"><svg class="i" viewBox="0 0 24 24" style="fill:currentColor"><path d="m12 3.5 2.6 5.3 5.9.9-4.3 4.1 1 5.8-5.2-2.7-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z"/></svg></span>Favoritos<span class="vc" id="v-fav"></span><svg class="i chev" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></svg></button>
       <button class="vrow" type="button" data-go="book"><span class="vi"><svg class="i" viewBox="0 0 24 24"><path d="M2 5.5c2.8-1.3 6.2-1.3 10 .8 3.8-2.1 7.2-2.1 10-.8v13c-2.8-1.3-6.2-1.3-10 .8-3.8-2.1-7.2-2.1-10-.8z"/><path d="M12 6.3v13"/></svg></span>Fazer livreto<span class="vc"></span><svg class="i chev" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></svg></button>
+      <button class="vrow" type="button" data-go="retro"><span class="vi"><svg class="i" viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/><path d="M8 14.5h2M14 14.5h2"/></svg></span>Retrospectiva do ano<span class="vc" id="v-retro"></span><svg class="i chev" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></svg></button>
     </div>
     <section id="cloud" aria-label="Nuvem e backup">
       <h2>Nuvem e backup <span class="sync-line" id="sync-line"><span class="sd"></span><span id="sync-txt">Só neste aparelho</span></span></h2>
@@ -574,6 +587,23 @@ body.mini .bar{top:calc(46px + env(safe-area-inset-top,0px))}
       <div class="row">
         <button class="btn" id="sc-save" type="button">Salvar</button>
         <button class="btn primary" id="sc-share" type="button">Compartilhar</button>
+      </div>
+    </div>
+  </section>
+  <section id="retro" hidden aria-label="Retrospectiva do ano">
+    <div class="chips rt-years" id="rt-years" role="tablist" aria-label="Ano"></div>
+    <div class="rt-strip" id="rt-strip" aria-label="Cartões da retrospectiva, deslize para o lado"></div>
+    <div class="rt-dots" id="rt-dots" aria-hidden="true"></div>
+    <div class="rt-more">
+      <div class="chips" id="rt-bg"><button type="button" class="chip" data-v="papel">Papel</button><button type="button" class="chip" data-v="noite">Noite</button></div>
+      <button class="chip" id="rt-swap" type="button" hidden>Trocar haicai</button>
+      <button class="chip" id="rt-all" type="button">Enviar todos</button>
+    </div>
+    <div class="composer-foot">
+      <button class="btn ghost" id="rt-close" type="button">Voltar</button>
+      <div class="row">
+        <button class="btn" id="rt-save" type="button">Salvar</button>
+        <button class="btn primary" id="rt-share" type="button">Compartilhar</button>
       </div>
     </div>
   </section>
@@ -1390,6 +1420,227 @@ $("#sc-close").addEventListener("click",goHome);
 $("#sc-save").addEventListener("click",scDownload);
 $("#sc-share").addEventListener("click",scShare);
 
+/* ---------- retrospectiva do ano ---------- */
+const RT_W=1080,RT_H=1920,RT_M=96;
+const RT_POEM='"Shippori Mincho","Hiragino Mincho ProN","Yu Mincho",Georgia,serif', RT_UI='"Inter Tight","Helvetica Neue","Hiragino Sans",Arial,sans-serif';
+const RT_ART={primavera:"a primavera",verao:"o verão",outono:"o outono",inverno:"o inverno"};
+const RT_STOP=new Set(("a o e as os um uma uns umas de da do das dos em na no nas nos num numa por pra pro para pelo pela pelos pelas com sem sob sobre entre ate que se ja nao mais menos muito muita muitos muitas tao so ainda la aqui ali cada todo toda todos todas tudo nada meu minha meus minhas teu tua teus tuas seu sua seus suas nosso nossa ele ela eles elas eu tu voce nos me te lhe isso isto esse essa esses essas este esta estes estas aquele aquela aquilo outro outra outros outras como quando onde quem qual mas ou nem tambem ao aos sao ser foi era vai vem tem estou esta estao sou ha dela dele delas deles nela nele neste nesta nesse nessa naquele naquela depois antes agora sempre nunca entao assim bem mesmo mesma dentro fora longe perto alem atras ali cada").split(" "));
+const RT_SEAW=new Set(["primavera","verao","outono","inverno"]);
+let rt={year:null,bg:store.get("hk.rtbg","papel"),idx:0,pick:{}}, rtSlides=[], rtBlobs=[], rtSeq=0, rtStatsCache=null;
+let rtLogoP={};
+function rtLogo(dark){const k=dark?"d":"l";return rtLogoP[k]||(rtLogoP[k]=new Promise(res=>{const im=new Image();im.onload=()=>res(im);im.onerror=()=>{rtLogoP[k]=null;res(null)};im.src=dark?"logo-dark.png":"logo-light.png"}))}
+function rtYears(){const ys=new Set();all().forEach(h=>{const y=(h.date||"").slice(0,4);if(/^\d{4}$/.test(y))ys.add(y)});return [...ys].sort().reverse()}
+function rtLongDate(iso){const[y,m,d]=iso.split("-");return (+d)+" de "+MONTHS[m-1]}
+function rtStats(y){
+  const key=y+":"+C.version();
+  if(rtStatsCache&&rtStatsCache.key===key)return rtStatsCache.s;
+  const items=all().filter(h=>(h.date||"").slice(0,4)===y);
+  if(!items.length)return null;
+  const dates=items.map(h=>h.date).sort();
+  const sea={primavera:0,verao:0,outono:0,inverno:0};
+  items.forEach(h=>{const k=h.season||seasonOf(h.date);if(k in sea)sea[k]++});
+  const mon=Array(12).fill(0);items.forEach(h=>mon[+h.date.slice(5,7)-1]++);
+  // kigos: só a frase exata no poema (mesma regra do Saijiki)
+  const hs=items.map(poemHay),kc=[];
+  kigos.forEach(k=>{const rx=k.rx||(k.rx=kigoRx(k.t));let c=0;for(const x of hs)if(rx.test(x))c++;if(c&&!RT_SEAW.has(foldStr(k.t).trim()))kc.push({t:k.t,c,s:KSEA[(k.c||"")[0]]})});
+  kc.sort((a,b)=>b.c-a.c||b.t.length-a.t.length);
+  // palavras: em quantos haicais cada uma aparece
+  const wc=new Map(),forms=new Map();
+  items.forEach(h=>{const seen=new Set();
+    (h.text||"").toLowerCase().split(/[^a-zà-öø-ÿ]+/).forEach(w=>{
+      if(w.length<3)return;const f=foldStr(w);if(RT_STOP.has(f)||RT_SEAW.has(f)||seen.has(f))return;seen.add(f);
+      wc.set(f,(wc.get(f)||0)+1);const fm=forms.get(f)||{};fm[w]=(fm[w]||0)+1;forms.set(f,fm)})});
+  const words=[...wc].sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0])).slice(0,8)
+    .map(([f,c])=>{const fm=forms.get(f);return {w:Object.keys(fm).sort((a,b)=>fm[b]-fm[a])[0],c}});
+  const favs=items.filter(h=>h.fav&&h.text);
+  const s={y,items,n:items.length,days:new Set(dates).size,first:dates[0],last:dates[dates.length-1],sea,mon,kc,words,favs};
+  rtStatsCache={key,s};return s;
+}
+function rtPal(){return rt.bg==="noite"
+  ?{dark:true,bg:"#1d1c1a",ink:"#eeece6",soft:"#a19e97",faint:"#3a3834",sea:{primavera:"#a9c3a2",verao:"#ddb877",outono:"#d8a089",inverno:"#a6b9cb"}}
+  :{dark:false,bg:"#f5f4f0",ink:"#141414",soft:"#6e6c66",faint:"#e3e0d8",sea:{primavera:"#6c8a66",verao:"#b0843f",outono:"#a5694f",inverno:"#687e93"}}}
+function rtFont(ctx,w,fs,fam){ctx.font=`${w} ${fs}px ${fam}`}
+function rtFitSize(ctx,txt,w,fam,max,maxW,min){let fs=max;for(;fs>(min||24);fs-=2){rtFont(ctx,w,fs,fam);if(ctx.measureText(txt).width<=maxW)break}rtFont(ctx,w,fs,fam);return fs}
+function rtSpacing(ctx,px){if("letterSpacing" in ctx)ctx.letterSpacing=px+"px"}
+function rtPara(ctx,txt,x,y,maxW,lh){scWrap(ctx,txt,maxW).forEach(l=>{ctx.fillText(l,x,y);y+=lh});return y}
+function rtRound(ctx,x,y,w,h,r){r=Math.min(r,w/2,h/2);ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath()}
+function rtEyebrow(ctx,pal,txt){ctx.textAlign="left";ctx.textBaseline="alphabetic";ctx.fillStyle=pal.soft;rtFont(ctx,600,38,RT_UI);rtSpacing(ctx,1);ctx.fillText(txt,RT_M,RT_M+120);rtSpacing(ctx,0)}
+function rtTitle(ctx,pal,txt,y){ctx.textAlign="left";ctx.fillStyle=pal.ink;rtFont(ctx,800,82,RT_UI);rtSpacing(ctx,-2);y=rtPara(ctx,txt,RT_M,y,RT_W-2*RT_M,96);rtSpacing(ctx,0);return y}
+async function rtFooter(ctx,pal,{icon=true}={}){
+  const sig=store.get("hk.sig","").trim(),fy=RT_H-RT_M,isz=64,base=fy-isz/2+12;
+  ctx.textBaseline="alphabetic";
+  if(icon){const im=await scIcon();
+    if(im){ctx.save();rtRound(ctx,RT_M,fy-isz,isz,isz,isz*0.22);ctx.clip();ctx.drawImage(im,RT_M,fy-isz,isz,isz);ctx.restore()}
+    ctx.textAlign="left";ctx.fillStyle=pal.soft;rtFont(ctx,600,30,RT_UI);ctx.fillText("Caderno de Haicais",RT_M+(im?isz+22:0),base)}
+  if(sig){ctx.textAlign="right";ctx.fillStyle=pal.ink;rtFont(ctx,400,36,RT_POEM);ctx.fillText("— "+sig,RT_W-RT_M,base)}
+}
+function rtSeasonDots(ctx,pal,cx,cy,r,gap){const ks=Object.keys(pal.sea),w=ks.length*2*r+(ks.length-1)*gap;let x=cx-w/2+r;ks.forEach(k=>{ctx.fillStyle=pal.sea[k];ctx.beginPath();ctx.arc(x,cy,r,0,7);ctx.fill();x+=2*r+gap})}
+function rtPoemPick(s){const c=s.favs.length?s.favs:s.items.filter(h=>h.text);if(!c.length)return null;
+  if(rt.pick[s.y]==null)rt.pick[s.y]=Math.floor(Math.random()*c.length);return {h:c[rt.pick[s.y]%c.length],fav:!!s.favs.length,n:c.length}}
+
+const RT_PAINT={
+  async capa(ctx,s,pal){
+    ctx.textAlign="center";ctx.textBaseline="alphabetic";
+    ctx.fillStyle=pal.soft;rtFont(ctx,600,40,RT_UI);rtSpacing(ctx,6);ctx.fillText("RETROSPECTIVA",RT_W/2,700);rtSpacing(ctx,0);
+    ctx.fillStyle=pal.ink;rtFont(ctx,800,330,RT_UI);rtSpacing(ctx,-14);ctx.fillText(s.y,RT_W/2,1010);rtSpacing(ctx,0);
+    rtFont(ctx,400,70,RT_POEM);ctx.fillText("um ano em haicais",RT_W/2,1150);
+    rtSeasonDots(ctx,pal,RT_W/2,1290,13,26);
+    await rtFooter(ctx,pal);
+  },
+  async total(ctx,s,pal){
+    rtEyebrow(ctx,pal,"Neste ano");
+    ctx.textAlign="left";ctx.fillStyle=pal.ink;rtFont(ctx,800,420,RT_UI);rtSpacing(ctx,-18);ctx.fillText(String(s.n),RT_M-14,900);rtSpacing(ctx,0);
+    rtFont(ctx,800,82,RT_UI);rtSpacing(ctx,-2);ctx.fillText(s.n===1?"haicai escrito":"haicais escritos",RT_M,1020);rtSpacing(ctx,0);
+    ctx.fillStyle=pal.soft;rtFont(ctx,400,50,RT_POEM);let y=1170;
+    if(s.days>1){ctx.fillText("em "+s.days+" dias diferentes",RT_M,y);y+=86}
+    if(s.first!==s.last){y=rtPara(ctx,"o primeiro em "+rtLongDate(s.first)+",",RT_M,y,RT_W-2*RT_M,72);rtPara(ctx,"o mais recente em "+rtLongDate(s.last),RT_M,y,RT_W-2*RT_M,72)}
+    await rtFooter(ctx,pal);
+  },
+  async estacoes(ctx,s,pal){
+    rtEyebrow(ctx,pal,"As estações");
+    const ks=SEASONS.map(([k])=>k),top=ks.slice().sort((a,b)=>s.sea[b]-s.sea[a])[0],max=Math.max(...ks.map(k=>s.sea[k]),1);
+    rtTitle(ctx,pal,"Quem mais apareceu foi "+RT_ART[top]+".",RT_M+290);
+    let y=880;const bx=RT_M+150,bw=RT_W-2*RT_M-150-150;
+    ks.forEach(k=>{
+      const on=k===top;ctx.textBaseline="alphabetic";
+      ctx.textAlign="left";ctx.fillStyle=pal.sea[k];rtFont(ctx,500,96,RT_POEM);ctx.fillText(KANJI[k],RT_M,y+34);
+      ctx.fillStyle=pal.soft;rtFont(ctx,600,36,RT_UI);ctx.fillText(SLABEL[k],bx,y-34);
+      ctx.fillStyle=pal.faint;rtRound(ctx,bx,y-6,bw,40,20);ctx.fill();
+      const w=Math.max(40,bw*s.sea[k]/max);ctx.globalAlpha=on?1:.62;ctx.fillStyle=pal.sea[k];rtRound(ctx,bx,y-6,w,40,20);ctx.fill();ctx.globalAlpha=1;
+      ctx.textAlign="right";ctx.fillStyle=pal.ink;rtFont(ctx,800,64,RT_UI);ctx.fillText(String(s.sea[k]),RT_W-RT_M,y+34);
+      y+=210});
+    await rtFooter(ctx,pal);
+  },
+  async meses(ctx,s,pal){
+    rtEyebrow(ctx,pal,"Mês a mês");
+    const max=Math.max(...s.mon),mi=s.mon.indexOf(max);
+    rtTitle(ctx,pal,MONTHS[mi][0].toUpperCase()+MONTHS[mi].slice(1)+" foi o mês mais cheio, com "+max+(max===1?" haicai.":" haicais."),RT_M+290);
+    const top=820,bot=1520,cw=(RT_W-2*RT_M)/12,bw=cw*0.6;
+    s.mon.forEach((c,i)=>{
+      const x=RT_M+i*cw+(cw-bw)/2,k=seasonOf(s.y+"-"+String(i+1).padStart(2,"0")+"-15");
+      ctx.fillStyle=pal.faint;rtRound(ctx,x,top,bw,bot-top,bw/2);ctx.fill();
+      if(c){const h=Math.max(bw,(bot-top)*c/max);ctx.globalAlpha=i===mi?1:.62;ctx.fillStyle=pal.sea[k];rtRound(ctx,x,bot-h,bw,h,bw/2);ctx.fill();ctx.globalAlpha=1}
+      ctx.textAlign="center";ctx.textBaseline="alphabetic";ctx.fillStyle=i===mi?pal.ink:pal.soft;rtFont(ctx,i===mi?800:600,34,RT_UI);ctx.fillText(MSHORT[i][0].toUpperCase(),x+bw/2,bot+64);
+      if(c&&(i===mi)){ctx.fillStyle=pal.ink;rtFont(ctx,800,40,RT_UI);ctx.fillText(String(c),x+bw/2,bot-(bot-top)*c/max-22)}});
+    await rtFooter(ctx,pal);
+  },
+  async kigos(ctx,s,pal){
+    rtEyebrow(ctx,pal,"Kigos do ano");
+    rtTitle(ctx,pal,"Os kigos que mais voltaram",RT_M+290);
+    let y=800;const list=s.kc.slice(0,5);
+    list.forEach((k,i)=>{
+      ctx.textBaseline="alphabetic";ctx.textAlign="left";
+      ctx.fillStyle=pal.soft;rtFont(ctx,800,44,RT_UI);ctx.fillText(String(i+1),RT_M,y);
+      if(k.s){ctx.fillStyle=pal.sea[k.s];ctx.beginPath();ctx.arc(RT_M+76,y-15,11,0,7);ctx.fill()}
+      ctx.fillStyle=pal.ink;rtFitSize(ctx,k.t,400,RT_POEM,72,RT_W-2*RT_M-110-170,40);ctx.fillText(k.t,RT_M+110,y);
+      ctx.textAlign="right";ctx.fillStyle=pal.soft;rtFont(ctx,700,40,RT_UI);ctx.fillText(k.c+(k.c===1?" vez":" vezes"),RT_W-RT_M,y);
+      ctx.fillStyle=pal.faint;ctx.fillRect(RT_M,y+52,RT_W-2*RT_M,2);
+      y+=160});
+    await rtFooter(ctx,pal);
+  },
+  async palavra(ctx,s,pal){
+    rtEyebrow(ctx,pal,"Palavra do ano");
+    const w=s.words[0];ctx.textAlign="center";ctx.textBaseline="alphabetic";ctx.fillStyle=pal.ink;
+    rtFitSize(ctx,w.w,500,RT_POEM,210,RT_W-2*RT_M,60);ctx.fillText(w.w,RT_W/2,960);
+    ctx.fillStyle=pal.soft;rtFont(ctx,600,44,RT_UI);ctx.fillText("está em "+w.c+(w.c===1?" haicai":" haicais"),RT_W/2,1080);
+    const rest=s.words.slice(1,6).map(x=>x.w);
+    if(rest.length){rtFont(ctx,600,32,RT_UI);rtSpacing(ctx,4);ctx.fillText("E TAMBÉM",RT_W/2,1290);rtSpacing(ctx,0);
+      ctx.fillStyle=pal.ink;rtFont(ctx,400,56,RT_POEM);
+      scWrap(ctx,rest.join(" · "),RT_W-2*RT_M).forEach((l,i)=>ctx.fillText(l,RT_W/2,1390+i*84))}
+    await rtFooter(ctx,pal);
+  },
+  async haicai(ctx,s,pal){
+    const p=rtPoemPick(s);if(!p)return;
+    rtEyebrow(ctx,pal,p.fav?"Um favorito de "+s.y:"Um haicai de "+s.y);
+    const h=p.h,sea=h.season||seasonOf(h.date),maxW=RT_W-2*RT_M;
+    const raw=(h.text||"").split("\n").map(l=>l.trim()).filter(Boolean);
+    let fs=76,lines=raw;
+    for(;fs>=40;fs-=2){rtFont(ctx,400,fs,RT_POEM);if(!raw.some(l=>ctx.measureText(l).width>maxW))break}
+    if(fs<40){fs=40;rtFont(ctx,400,fs,RT_POEM);lines=raw.flatMap(l=>scWrap(ctx,l,maxW))}
+    rtFont(ctx,400,fs,RT_POEM);
+    const lh=fs*1.8,blockW=Math.max(...lines.map(l=>ctx.measureText(l).width),1),x0=Math.round((RT_W-blockW)/2),blockH=lh*(lines.length-1)+fs;
+    let y=Math.round((RT_H-blockH)/2+fs*0.85);
+    if(sea){ctx.textAlign="left";ctx.fillStyle=pal.sea[sea];rtFont(ctx,500,64,RT_POEM);ctx.fillText(KANJI[sea],x0,y-fs-90);rtFont(ctx,400,fs,RT_POEM)}
+    ctx.textAlign="left";ctx.textBaseline="alphabetic";ctx.fillStyle=pal.ink;
+    lines.forEach(l=>{ctx.fillText(l,x0,y);y+=lh});
+    await rtFooter(ctx,pal);
+  },
+  async fim(ctx,s,pal){
+    const logo=await rtLogo(pal.dark);
+    if(logo){const w=560,h=w*logo.height/logo.width;ctx.drawImage(logo,(RT_W-w)/2,700-h/2,w,h)}
+    ctx.textAlign="center";ctx.textBaseline="alphabetic";ctx.fillStyle=pal.ink;rtFont(ctx,400,64,RT_POEM);
+    ctx.fillText("que venham",RT_W/2,1040);ctx.fillText("outras estações",RT_W/2,1130);
+    ctx.fillStyle=pal.soft;rtFont(ctx,600,38,RT_UI);ctx.fillText(s.n+(s.n===1?" haicai":" haicais")+" · "+s.y,RT_W/2,1250);
+    rtSeasonDots(ctx,pal,RT_W/2,1350,10,22);
+    await rtFooter(ctx,pal,{icon:false});
+  }
+};
+function rtPlan(s){
+  const out=["capa","total","estacoes","meses"];
+  if(s.kc.length)out.push("kigos");
+  if(s.words.length)out.push("palavra");
+  if(s.items.some(h=>h.text))out.push("haicai");
+  out.push("fim");return out;
+}
+async function rtPaint(i){
+  const s=rtStats(rt.year),cv=$("#rt-strip").children[i];if(!s||!cv)return;
+  const my=rtSeq,ctx=cv.getContext("2d"),pal=rtPal();
+  ctx.setTransform(1,0,0,1,0,0);rtSpacing(ctx,0);ctx.globalAlpha=1;
+  ctx.fillStyle=pal.bg;ctx.fillRect(0,0,RT_W,RT_H);
+  await RT_PAINT[rtSlides[i]](ctx,s,pal);
+  if(my!==rtSeq)return;
+  rtBlobs[i]=null;cv.toBlob(b=>{if(my===rtSeq)rtBlobs[i]=b},"image/png");
+}
+async function rtDrawAll(){
+  const my=++rtSeq,s=rtStats(rt.year),strip=$("#rt-strip");
+  if(!s){strip.innerHTML='<p class="rt-empty">Ainda não há haicais com data neste ano.</p>';$("#rt-dots").innerHTML="";return}
+  rtSlides=rtPlan(s);rtBlobs=[];
+  if(strip.children.length!==rtSlides.length||strip.querySelector("p")){
+    strip.innerHTML=rtSlides.map((k,i)=>`<canvas width="${RT_W}" height="${RT_H}" aria-label="Cartão ${i+1} de ${rtSlides.length}"></canvas>`).join("");
+    $("#rt-dots").innerHTML=rtSlides.map(()=>"<i></i>").join("");
+  }
+  try{await Promise.all([document.fonts.load('400 60px "Shippori Mincho"',"春夏秋冬 abcdeãçéõ"),document.fonts.load('500 60px "Shippori Mincho"',"春夏秋冬 abcdeãçéõ"),
+    document.fonts.load('600 30px "Inter Tight"',"0123456789 abc"),document.fonts.load('800 80px "Inter Tight"',"0123456789 abc")])}catch(e){}
+  if(my!==rtSeq)return;
+  for(let i=0;i<rtSlides.length;i++){await rtPaint(i);if(my!==rtSeq)return}
+}
+function rtSync(){
+  $("#rt-years").querySelectorAll(".chip").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.v===rt.year)));
+  $("#rt-bg").querySelectorAll(".chip").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.v===rt.bg)));
+  const strip=$("#rt-strip"),n=rtSlides.length;
+  $("#rt-dots").querySelectorAll("i").forEach((d,i)=>d.classList.toggle("on",i===rt.idx));
+  const s=rt.year&&rtStats(rt.year);
+  $("#rt-swap").hidden=!(rtSlides[rt.idx]==="haicai"&&s&&((s.favs.length||s.items.length)>1));
+  ["#rt-save","#rt-share","#rt-all"].forEach(id=>$(id).disabled=!n);
+}
+function renderRetro(){
+  const ys=rtYears();
+  if(!rt.year||!ys.includes(rt.year))rt.year=ys[0]||null;
+  $("#rt-years").innerHTML=ys.map(y=>`<button type="button" class="chip" role="tab" data-v="${y}">${y}</button>`).join("");
+  if(!rt.year){$("#rt-strip").innerHTML='<p class="rt-empty">Quando houver haicais com data, a retrospectiva do ano aparece aqui.</p>';$("#rt-dots").innerHTML="";rtSlides=[];rtSync();return}
+  rt.idx=0;$("#rt-strip").scrollLeft=0;
+  rtDrawAll().then(rtSync);rtSync();
+}
+function rtName(i){return "retrospectiva-"+rt.year+"-"+(i+1)+".png"}
+function rtFile(i){return rtBlobs[i]?new File([rtBlobs[i]],rtName(i),{type:"image/png"}):null}
+function rtDownload(files){files.forEach((f,i)=>setTimeout(()=>{const a=document.createElement("a");a.href=URL.createObjectURL(f);a.download=f.name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1500)},i*350))}
+function rtShare(files){
+  if(files.some(f=>!f)){toast("Preparando as imagens… tente de novo.");return}
+  if(navigator.canShare&&navigator.canShare({files})){navigator.share({files}).catch(()=>{});return}
+  rtDownload(files);toast(files.length>1?"Imagens salvas.":"Imagem salva.");
+}
+$("#rt-years").addEventListener("click",e=>{const b=e.target.closest("[data-v]");if(!b||b.dataset.v===rt.year)return;rt.year=b.dataset.v;rt.idx=0;$("#rt-strip").scrollTo({left:0});rtSync();rtDrawAll().then(rtSync)});
+$("#rt-bg").addEventListener("click",e=>{const b=e.target.closest("[data-v]");if(!b)return;rt.bg=b.dataset.v;store.set("hk.rtbg",rt.bg);rtSync();rtDrawAll()});
+$("#rt-swap").addEventListener("click",()=>{rt.pick[rt.year]=(rt.pick[rt.year]||0)+1;const i=rtSlides.indexOf("haicai");if(i>=0)rtPaint(i)});
+$("#rt-strip").addEventListener("scroll",()=>{const st=$("#rt-strip"),c=st.children[0];if(!c||c.tagName!=="CANVAS")return;
+  const step=c.getBoundingClientRect().width+14,i=Math.max(0,Math.min(rtSlides.length-1,Math.round(st.scrollLeft/step)));if(i!==rt.idx){rt.idx=i;rtSync()}},{passive:true});
+$("#rt-dots").addEventListener("click",e=>{const d=e.target.closest("i");if(!d)return;const i=[...d.parentNode.children].indexOf(d),c=$("#rt-strip").children[i];if(c)c.scrollIntoView({behavior:"smooth",inline:"center",block:"nearest"})});
+$("#rt-save").addEventListener("click",()=>{const f=rtFile(rt.idx);if(!f){toast("Preparando a imagem… tente de novo.");return}rtDownload([f])});
+$("#rt-share").addEventListener("click",()=>rtShare([rtFile(rt.idx)]));
+$("#rt-all").addEventListener("click",()=>rtShare(rtSlides.map((_,i)=>rtFile(i))));
+$("#rt-close").addEventListener("click",()=>setView("voce"));
+window.Retro={stats:rtStats,get slides(){return rtSlides},get blobs(){return rtBlobs},get state(){return rt}};
+
 /* ---------- páginas ---------- */
 function setView(v){
   if(v==="nuvem")v="voce";
@@ -1397,12 +1648,12 @@ function setView(v){
   view=v; document.body.dataset.view=v;
   if(changed){resetList=true;animNext=true;const bd=document.body;bd.classList.remove("vt");void bd.offsetWidth;bd.classList.add("vt");clearTimeout(setView.t);setView.t=setTimeout(()=>bd.classList.remove("vt"),450)}
   const show=(sel,on)=>{const el=$(sel);if(el)el.hidden=!on};
-  show("#composer",v==="escrever"); show("#voce",v==="voce"); show("#bookform",v==="livreto"); show("#sharecard",v==="cartao"); show("#reencontro",v==="reencontro");
+  show("#composer",v==="escrever"); show("#voce",v==="voce"); show("#bookform",v==="livreto"); show("#sharecard",v==="cartao"); show("#reencontro",v==="reencontro"); show("#retro",v==="retro");
   show("#featured",v==="haicais"&&!st.q); show(".bar",v==="haicais"||v==="kigos"); show("#tabs",v==="haicais");
   show(".listinfo",v==="haicais"); show("#list",v==="haicais"||v==="kigos"); show("header.top .hd",v!=="escrever"); show(".top-actions",v==="haicais");
   const H={haicais:["Caderno",()=>{const t=todayISO();return (SLABEL[seasonOf(t)]||"")+" · "+(+t.slice(8))+" "+MSHORT[+t.slice(5,7)-1]}],
     kigos:["Saijiki","Dicionário de kigos"],reencontro:["Reencontrar","Um haicai ao acaso"],voce:["Você","Backup, livreto e cópias"],
-    livreto:["Livreto","Para imprimir ou salvar em PDF"],cartao:["Cartão","Para compartilhar nas redes"]}[v];
+    livreto:["Livreto","Para imprimir ou salvar em PDF"],cartao:["Cartão","Para compartilhar nas redes"],retro:["Retrospectiva","Seu ano em haicais"]}[v];
   if(H){$("#h1").textContent=H[0];$("#mini-t").textContent=H[0];$("#eyebrow").textContent=typeof H[1]==="function"?H[1]():H[1]}
   if(v!=="escrever")editingId=null;
   if(v==="kigos"){if(st.tab!=="kigos"){st.tab="kigos";render()}}
@@ -1410,8 +1661,9 @@ function setView(v){
   const cur={haicais:"#btn-home",kigos:"#btn-kigos",reencontro:"#btn-re",voce:"#btn-cloud"}[v];
   document.querySelectorAll(".tabbar .tbb").forEach(b=>b.removeAttribute("aria-current"));
   if(cur)$(cur).setAttribute("aria-current","page");
-  if(v==="voce")renderCloud();
+  if(v==="voce"){renderCloud();const ry=rtYears();$("#v-retro").textContent=ry[0]||""}
   if(v==="reencontro")renderRe();
+  if(v==="retro")renderRetro();
   scheduleFit();
   window.scrollTo(0,0);onScrollMini();
 }
@@ -1451,6 +1703,7 @@ document.querySelectorAll("#voce [data-go]").forEach(b=>b.addEventListener("clic
   const g=b.dataset.go;
   if(g==="fav"){st.q="★";$("#q").value="★";$("#q-clear").hidden=false;st.tab="todos";store.set("hk.tab","todos");setView("haicais");setSearching(true);render();if(!all().some(h=>h.fav))toast("Ainda não há favoritos: toque na estrela de um haicai.");return}
   if(g==="book"){openBookForm();return}
+  if(g==="retro"){setView("retro");return}
 }));
 
 /* ---------- nuvem ---------- */
