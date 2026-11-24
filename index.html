@@ -694,11 +694,14 @@ const KSEA={P:"primavera",V:"verao",O:"outono",I:"inverno"};
 let kigos=[], kigoCache=null, kigoCacheKey="";
 function kSeason(c){return KSEA[c[0]]}
 function kCat(c){return c.slice(1)}
-function kigoRx(t){const f=foldStr(t).replace(/[.*+?^${}()|[\]\\]/g,"\\$&");return new RegExp("(^|[^a-z])"+f+"(s|es)?(?![a-z])")}
+function kigoRx(t){const f=foldStr(t).trim().replace(/\s+/g," ").replace(/[.*+?^${}()|[\]\\]/g,"\\$&");return new RegExp("(^|[^a-z])"+f+"(s|es)?(?![a-z])")}
+const poemHay=h=>" "+foldStr(h.text||"").replace(/\s+/g," ")+" ";
+const kigoRxCache=new Map();
+function hasKigo(h,t){let rx=kigoRxCache.get(t);if(!rx){rx=kigoRx(t);kigoRxCache.set(t,rx)}return rx.test(poemHay(h))}
 function kigoCounts(items){
   const key=items.length+":"+C.version();
   if(kigoCache&&kigoCacheKey===key) return kigoCache;
-  const hs=items.map(hay); const m=new Map();
+  const hs=items.map(poemHay); const m=new Map();
   kigos.forEach(k=>{const rx=k.rx||(k.rx=kigoRx(k.t));let c=0;for(const s of hs) if(rx.test(s)) c++; if(c) m.set(k.t,c)});
   kigoCache=m;kigoCacheKey=key;return m;
 }
@@ -769,9 +772,11 @@ function render(){
   $("#q").placeholder=st.tab==="kigos"?"Buscar kigo: lua, ipê, cigarra, geada…":"Buscar palavras, datas, kigo, número…";
   if(st.tab==="kigos"){if(listIO)listIO.disconnect();lazy=null;renderKigos(items);return}
   const q=st.q.trim(); const numQ=/^#?\d+$/.test(q)?+q.replace("#",""):null;
-  const terms=numQ!=null?[]:foldStr(q).split(/\s+/).filter(Boolean);
+  const phrase=numQ==null&&/^["“”].+["“”]$/.test(q)?q.slice(1,-1).trim():null;
+  const terms=numQ!=null?[]:phrase?[foldStr(phrase).replace(/\s+/g," ")]:foldStr(q).split(/\s+/).filter(Boolean);
   let list=items.filter(h=>st.tab==="todos"||h.season===st.tab);
   if(numQ!=null) list=list.filter(h=>h.n===numQ);
+  else if(phrase) list=list.filter(h=>hasKigo(h,phrase));
   else if(terms.length) list=list.filter(h=>{const s=hay(h);return terms.every(t=>s.includes(t))});
   if(st.order==="desc") list=list.slice().reverse();
   $("#count").textContent=(q?list.length+" encontrado"+(list.length===1?"":"s"):list.length+" haicai"+(list.length===1?"":"s"))+(st.tab!=="todos"?" · "+SLABEL[st.tab]:"");
@@ -1079,7 +1084,7 @@ document.addEventListener("click",e=>{
   else if(a==="rand"){randomPick()}
   else if(a==="open-re"){featured=id;setView("reencontro")}
   else if(a==="kf"){st[b.dataset.g]=b.dataset.v;if(b.dataset.g==="ks"){st.kc="todas";st.q="";$("#q").value="";$("#q-clear").hidden=true}render();if(b.dataset.g==="ks")window.scrollTo(0,0)}
-  else if(a==="kigo"){st.q=b.dataset.term;$("#q").value=st.q;$("#q-clear").hidden=false;st.tab="todos";store.set("hk.tab","todos");setView("haicais");render()}
+  else if(a==="kigo"){st.q='"'+b.dataset.term+'"';resetList=true;$("#q").value=st.q;$("#q-clear").hidden=false;st.tab="todos";store.set("hk.tab","todos");setView("haicais");render()}
 });
 document.addEventListener("change",e=>{if(e.target.id==="k-mine"){st.kmine=e.target.checked;render()}});
 function saveFile(name,text,type){
@@ -1185,7 +1190,7 @@ function bkItems(){
     case "ano": list=items.filter(h=>h.date&&h.date.startsWith($("#bk-year").value));break;
     case "periodo":{const f=$("#bk-from").value,t=$("#bk-to").value;list=items.filter(h=>h.date&&(!f||h.date>=f)&&(!t||h.date<=t));break}
     case "fav": list=items.filter(h=>h.fav);break;
-    case "kigo":{const v=$("#bk-kigo").value.trim();if(!v){list=[];break}const rx=kigoRx(v);list=items.filter(h=>rx.test(" "+hay(h)+" "));break}
+    case "kigo":{const v=$("#bk-kigo").value.trim();if(!v){list=[];break}list=items.filter(h=>hasKigo(h,v));break}
     case "busca": list=bkSearch(items);break;
     case "nums":{const set=bkParseNums($("#bk-nums").value);list=items.filter(h=>h.n!=null&&set.has(+h.n));break}
     default: list=items;

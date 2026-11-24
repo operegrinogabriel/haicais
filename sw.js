@@ -1,5 +1,5 @@
 /* Guarda o app no aparelho para abrir sem internet. Troque VERSION a cada atualização. */
-const VERSION = "haicais-v15";
+const VERSION = "haicais-v16";
 const SHELL = ["./", "index.html", "store.js", "config.js", "manifest.webmanifest", "icon-192.png", "icon-512.png", "apple-touch-icon.png", "favicon-32.png", "logo-light.png", "logo-dark.png", "kigos.json"];
 self.addEventListener("install", e => { e.waitUntil(caches.open(VERSION).then(c => c.addAll(SHELL)).then(() => self.skipWaiting())) });
 self.addEventListener("activate", e => {
